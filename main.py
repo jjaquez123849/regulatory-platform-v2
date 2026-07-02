@@ -3,6 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.database import Base, engine
 
+# =========================
+# Models
+# =========================
+
 from app.models import (
     Process,
     ProcessField,
@@ -12,7 +16,25 @@ from app.models import (
     WorkflowHistory,
     DocumentType,
     DocumentExtractionField,
-    ExcelColumnMapping
+    ExcelColumnMapping,
+    Record,
+    RecordValue,
+    RecordPerson,
+    RecordRequestItem,
+    Document,
+    DocumentExtractionResult,
+    Task,
+    AuditLog
+)
+
+# =========================
+# Routes
+# =========================
+
+from app.routes import (
+    admin,
+    document_admin,
+    workflow_admin
 )
 
 
@@ -40,6 +62,11 @@ def startup():
     Base.metadata.create_all(bind=engine)
 
 
+app.include_router(admin.router)
+app.include_router(document_admin.router)
+app.include_router(workflow_admin.router)
+
+
 @app.get("/")
 def root():
     return {
@@ -54,5 +81,8 @@ def health():
     return {
         "status": "healthy",
         "database": "sqlite",
-        "configuration_source": "database"
+        "configuration_source": "database",
+        "admin_module": "enabled",
+        "document_admin_module": "enabled",
+        "workflow_admin_module": "enabled"
     }

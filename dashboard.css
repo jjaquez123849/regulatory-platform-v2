@@ -1,0 +1,21 @@
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.metric-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.metric-card span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.metric-card strong {
+  font-size: 30px;
+}

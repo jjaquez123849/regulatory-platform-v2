@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import PageHeader from "../../components/ui/PageHeader.jsx";
 import Card from "../../components/ui/Card.jsx";
@@ -96,9 +97,15 @@ function DocumentsPage() {
       key: "actions",
       label: "Acciones",
       render: (row) => (
-        <Button variant="secondary" onClick={() => handleProcess(row.id)}>
-          Procesar
-        </Button>
+        <div className="row-actions">
+          <Button variant="secondary" onClick={() => handleProcess(row.id)}>
+            Procesar
+          </Button>
+
+          <Link to={`/documents/${row.id}/extraction`}>
+            Revisar extracción
+          </Link>
+        </div>
       ),
     },
   ];
@@ -114,7 +121,10 @@ function DocumentsPage() {
         <form onSubmit={handleUpload} className="simple-form">
           <label>
             Registro
-            <select value={recordId} onChange={(event) => setRecordId(event.target.value)}>
+            <select
+              value={recordId}
+              onChange={(event) => setRecordId(event.target.value)}
+            >
               <option value="">Sin asociar</option>
               {records.map((record) => (
                 <option key={record.id} value={record.id}>

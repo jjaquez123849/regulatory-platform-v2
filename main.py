@@ -3,6 +3,18 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.database import Base, engine
 
+from app.models import (
+    Process,
+    ProcessField,
+    FieldOption,
+    WorkflowState,
+    WorkflowTransition,
+    WorkflowHistory,
+    DocumentType,
+    DocumentExtractionField,
+    ExcelColumnMapping
+)
+
 
 app = FastAPI(
     title="Regulatory Platform V2",

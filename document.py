@@ -46,6 +46,11 @@ class DocumentExtractionResult(Base):
     extracted_value = Column(Text, nullable=True)
     normalized_value = Column(Text, nullable=True)
 
+    source_sheet = Column(String(255), nullable=True)
+    source_row = Column(Integer, nullable=True)
+    source_column = Column(String(255), nullable=True)
+    source_group_key = Column(String(255), nullable=True)
+
     confidence_score = Column(String(50), nullable=True)
     status = Column(String(100), default="proposed")
 

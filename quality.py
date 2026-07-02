@@ -2,10 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.schemas.quality_schema import QualityIssueResolveRequest
 from app.services.quality_service import (
     run_quality_review,
     list_quality_reviews,
-    list_quality_issues
+    list_quality_issues,
+    resolve_quality_issue
 )
 
 
@@ -102,3 +104,31 @@ def read_quality_issues(
         }
         for item in issues
     ]
+
+
+@router.put("/issues/{issue_id}/resolve")
+def resolve_issue(
+    issue_id: int,
+    payload: QualityIssueResolveRequest,
+    db: Session = Depends(get_db)
+):
+    issue = resolve_quality_issue(
+        db=db,
+        issue_id=issue_id,
+        resolved_by=payload.resolved_by,
+        resolution_comment=payload.resolution_comment
+    )
+
+    if not issue:
+        raise HTTPException(status_code=404, detail="Observación no encontrada")
+
+    return {
+        "id": issue.id,
+        "record_id": issue.record_id,
+        "issue_type": issue.issue_type,
+        "severity": issue.severity,
+        "description": issue.description,
+        "is_resolved": issue.is_resolved,
+        "resolved_by": issue.resolved_by,
+        "resolved_at": issue.resolved_at
+    }

@@ -37,7 +37,8 @@ from app.routes import (
     document_processing,
     extraction,
     learning,
-    quality
+    quality,
+    tasks
 )
 
 
@@ -76,6 +77,7 @@ app.include_router(document_processing.router)
 app.include_router(extraction.router)
 app.include_router(learning.router)
 app.include_router(quality.router)
+app.include_router(tasks.router)
 
 
 @app.get("/")
@@ -103,5 +105,6 @@ def health():
         "document_processing_module": "enabled",
         "extraction_module": "enabled",
         "learning_module": "enabled",
-        "quality_module": "enabled"
+        "quality_module": "enabled",
+        "tasks_module": "enabled"
     }

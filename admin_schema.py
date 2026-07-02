@@ -118,3 +118,115 @@ class FieldOptionResponse(BaseModel):
 class ProcessFullConfigResponse(BaseModel):
     process: ProcessResponse
     fields: List[ProcessFieldResponse]
+
+# =========================
+# Document Types
+# =========================
+
+class DocumentTypeCreate(BaseModel):
+    process_id: int
+    code: str
+    name: str
+    description: Optional[str] = None
+    direction: str = "input"
+    allowed_extensions: Optional[str] = None
+    is_required: bool = False
+    is_ai_enabled: bool = True
+
+
+class DocumentTypeUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    direction: Optional[str] = None
+    allowed_extensions: Optional[str] = None
+    is_required: Optional[bool] = None
+    is_ai_enabled: Optional[bool] = None
+
+
+class DocumentTypeResponse(BaseModel):
+    id: int
+    process_id: int
+    code: str
+    name: str
+    description: Optional[str] = None
+    direction: str
+    allowed_extensions: Optional[str] = None
+    is_required: bool
+    is_ai_enabled: bool
+
+    class Config:
+        from_attributes = True
+
+
+# =========================
+# Document Extraction Fields
+# =========================
+
+class DocumentExtractionFieldCreate(BaseModel):
+    document_type_id: int
+    source_name: str
+    target_entity: str
+    target_field: str
+    extraction_type: str = "ai"
+    is_required: bool = False
+    instructions: Optional[str] = None
+
+
+class DocumentExtractionFieldUpdate(BaseModel):
+    source_name: Optional[str] = None
+    target_entity: Optional[str] = None
+    target_field: Optional[str] = None
+    extraction_type: Optional[str] = None
+    is_required: Optional[bool] = None
+    instructions: Optional[str] = None
+
+
+class DocumentExtractionFieldResponse(BaseModel):
+    id: int
+    document_type_id: int
+    source_name: str
+    target_entity: str
+    target_field: str
+    extraction_type: str
+    is_required: bool
+    instructions: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+# =========================
+# Excel Column Mappings
+# =========================
+
+class ExcelColumnMappingCreate(BaseModel):
+    document_type_id: int
+    sheet_name: Optional[str] = None
+    header_row: int = 1
+    column_name: str
+    target_entity: str
+    target_field: str
+    is_required: bool = False
+
+
+class ExcelColumnMappingUpdate(BaseModel):
+    sheet_name: Optional[str] = None
+    header_row: Optional[int] = None
+    column_name: Optional[str] = None
+    target_entity: Optional[str] = None
+    target_field: Optional[str] = None
+    is_required: Optional[bool] = None
+
+
+class ExcelColumnMappingResponse(BaseModel):
+    id: int
+    document_type_id: int
+    sheet_name: Optional[str] = None
+    header_row: int
+    column_name: str
+    target_entity: str
+    target_field: str
+    is_required: bool
+
+    class Config:
+        from_attributes = True

@@ -2,9 +2,11 @@ from sqlalchemy.orm import Session
 
 from app.models.document import Document
 from app.engines.documents.excel_reader import read_excel_with_config
+from app.engines.documents.pdf_reader import read_pdf_with_config
 
 
 EXCEL_EXTENSIONS = ["xlsx", "xls", "csv"]
+PDF_EXTENSIONS = ["pdf"]
 
 
 def process_document(db: Session, document_id: int) -> dict:
@@ -24,6 +26,12 @@ def process_document(db: Session, document_id: int) -> dict:
 
     if extension in EXCEL_EXTENSIONS:
         return read_excel_with_config(
+            db=db,
+            document=document
+        )
+
+    if extension in PDF_EXTENSIONS:
+        return read_pdf_with_config(
             db=db,
             document=document
         )

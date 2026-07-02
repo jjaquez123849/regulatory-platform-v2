@@ -69,6 +69,12 @@
   align-items: center;
 }
 
+.row-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .form-field small {
   color: var(--muted);
 }

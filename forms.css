@@ -35,6 +35,39 @@
   min-height: 96px;
   resize: vertical;
 }
+.simple-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.simple-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.simple-form input,
+.simple-form textarea,
+.simple-form select {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: white;
+  font-size: 14px;
+}
+
+.simple-form textarea {
+  min-height: 90px;
+}
+
+.checkbox-row {
+  flex-direction: row !important;
+  align-items: center;
+}
 
 .form-field small {
   color: var(--muted);

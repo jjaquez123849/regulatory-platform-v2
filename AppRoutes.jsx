@@ -6,9 +6,9 @@ import DashboardPage from "../../features/dashboard/DashboardPage.jsx";
 import LogPage from "../../features/log/LogPage.jsx";
 import RecordsPage from "../../features/records/RecordsPage.jsx";
 import DocumentsPage from "../../features/documents/DocumentsPage.jsx";
-import TasksPage from "../../features/tasks/TasksPage.jsx";
-
 import ExtractionResultsPage from "../../features/extraction/ExtractionResultsPage.jsx";
+import TasksPage from "../../features/tasks/TasksPage.jsx";
+import QualityPage from "../../features/quality/QualityPage.jsx";
 
 import AdminHomePage from "../../features/admin/AdminHomePage.jsx";
 import ProcessesPage from "../../features/admin/processes/ProcessesPage.jsx";
@@ -26,6 +26,7 @@ function AppRoutes() {
         <Route path="/documents" element={<DocumentsPage />} />
         <Route path="/documents/:documentId/extraction" element={<ExtractionResultsPage />} />
         <Route path="/tasks" element={<TasksPage />} />
+        <Route path="/quality" element={<QualityPage />} />
 
         <Route path="/admin" element={<AdminHomePage />} />
         <Route path="/admin/processes" element={<ProcessesPage />} />

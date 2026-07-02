@@ -1,0 +1,47 @@
+.dynamic-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field label {
+  font-size: 13px;
+  color: #374151;
+  font-weight: 600;
+}
+
+.required {
+  color: var(--danger);
+  margin-left: 4px;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: white;
+  font-size: 14px;
+}
+
+.form-field textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.form-field small {
+  color: var(--muted);
+}
+
+.form-actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+}

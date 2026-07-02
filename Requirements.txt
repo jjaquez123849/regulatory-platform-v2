@@ -10,3 +10,5 @@ pypdf
 pdfplumber
 beautifulsoup4
 lxml
+extract-msg
+python-docx

@@ -20,7 +20,8 @@ from app.models import (
     Document,
     DocumentExtractionResult,
     Task,
-    AuditLog
+    AuditLog,
+    ExtractionLearningExample
 )
 
 from app.routes import (
@@ -32,7 +33,8 @@ from app.routes import (
     workflow,
     documents,
     document_processing,
-    extraction
+    extraction,
+    learning
 )
 
 
@@ -69,6 +71,7 @@ app.include_router(workflow.router)
 app.include_router(documents.router)
 app.include_router(document_processing.router)
 app.include_router(extraction.router)
+app.include_router(learning.router)
 
 
 @app.get("/")
@@ -94,5 +97,6 @@ def health():
         "workflow_module": "enabled",
         "documents_module": "enabled",
         "document_processing_module": "enabled",
-        "extraction_module": "enabled"
+        "extraction_module": "enabled",
+        "learning_module": "enabled"
     }

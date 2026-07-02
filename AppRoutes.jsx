@@ -8,6 +8,8 @@ import RecordsPage from "../../features/records/RecordsPage.jsx";
 import DocumentsPage from "../../features/documents/DocumentsPage.jsx";
 import TasksPage from "../../features/tasks/TasksPage.jsx";
 
+import ExtractionResultsPage from "../../features/extraction/ExtractionResultsPage.jsx";
+
 import AdminHomePage from "../../features/admin/AdminHomePage.jsx";
 import ProcessesPage from "../../features/admin/processes/ProcessesPage.jsx";
 import FieldsPage from "../../features/admin/fields/FieldsPage.jsx";
@@ -22,6 +24,7 @@ function AppRoutes() {
         <Route path="/log" element={<LogPage />} />
         <Route path="/records" element={<RecordsPage />} />
         <Route path="/documents" element={<DocumentsPage />} />
+        <Route path="/documents/:documentId/extraction" element={<ExtractionResultsPage />} />
         <Route path="/tasks" element={<TasksPage />} />
 
         <Route path="/admin" element={<AdminHomePage />} />

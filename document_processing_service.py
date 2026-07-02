@@ -3,10 +3,12 @@ from sqlalchemy.orm import Session
 from app.models.document import Document
 from app.engines.documents.excel_reader import read_excel_with_config
 from app.engines.documents.pdf_reader import read_pdf_with_config
+from app.engines.documents.text_document_reader import read_text_document_with_config
 
 
 EXCEL_EXTENSIONS = ["xlsx", "xls", "csv"]
 PDF_EXTENSIONS = ["pdf"]
+TEXT_EXTENSIONS = ["eml", "msg", "docx"]
 
 
 def process_document(db: Session, document_id: int) -> dict:
@@ -32,6 +34,12 @@ def process_document(db: Session, document_id: int) -> dict:
 
     if extension in PDF_EXTENSIONS:
         return read_pdf_with_config(
+            db=db,
+            document=document
+        )
+
+    if extension in TEXT_EXTENSIONS:
+        return read_text_document_with_config(
             db=db,
             document=document
         )

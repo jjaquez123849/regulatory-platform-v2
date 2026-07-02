@@ -5,3 +5,18 @@ from app.models.document_config import (
     DocumentExtractionField,
     ExcelColumnMapping
 )
+
+from app.models.record import (
+    Record,
+    RecordValue,
+    RecordPerson,
+    RecordRequestItem
+)
+
+from app.models.document import (
+    Document,
+    DocumentExtractionResult
+)
+
+from app.models.task import Task
+from app.models.audit import AuditLog

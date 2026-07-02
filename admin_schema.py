@@ -230,3 +230,81 @@ class ExcelColumnMappingResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+# =========================
+# Workflow States
+# =========================
+
+class WorkflowStateCreate(BaseModel):
+    process_id: int
+    code: str
+    name: str
+    display_order: int = 0
+    color: Optional[str] = None
+    is_initial: bool = False
+    is_final: bool = False
+    is_active: bool = True
+
+
+class WorkflowStateUpdate(BaseModel):
+    name: Optional[str] = None
+    display_order: Optional[int] = None
+    color: Optional[str] = None
+    is_initial: Optional[bool] = None
+    is_final: Optional[bool] = None
+    is_active: Optional[bool] = None
+
+
+class WorkflowStateResponse(BaseModel):
+    id: int
+    process_id: int
+    code: str
+    name: str
+    display_order: int
+    color: Optional[str] = None
+    is_initial: bool
+    is_final: bool
+    is_active: bool
+
+    class Config:
+        from_attributes = True
+
+
+# =========================
+# Workflow Transitions
+# =========================
+
+class WorkflowTransitionCreate(BaseModel):
+    process_id: int
+    code: str
+    name: str
+    from_state_id: int
+    to_state_id: int
+    requires_comment: bool = False
+    requires_checklist_completed: bool = False
+    is_active: bool = True
+
+
+class WorkflowTransitionUpdate(BaseModel):
+    name: Optional[str] = None
+    from_state_id: Optional[int] = None
+    to_state_id: Optional[int] = None
+    requires_comment: Optional[bool] = None
+    requires_checklist_completed: Optional[bool] = None
+    is_active: Optional[bool] = None
+
+
+class WorkflowTransitionResponse(BaseModel):
+    id: int
+    process_id: int
+    code: str
+    name: str
+    from_state_id: int
+    to_state_id: int
+    requires_comment: bool
+    requires_checklist_completed: bool
+    is_active: bool
+
+    class Config:
+        from_attributes = True
+    

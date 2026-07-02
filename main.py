@@ -21,7 +21,9 @@ from app.models import (
     DocumentExtractionResult,
     Task,
     AuditLog,
-    ExtractionLearningExample
+    ExtractionLearningExample,
+    QualityReview,
+    QualityIssue
 )
 
 from app.routes import (
@@ -34,7 +36,8 @@ from app.routes import (
     documents,
     document_processing,
     extraction,
-    learning
+    learning,
+    quality
 )
 
 
@@ -72,6 +75,7 @@ app.include_router(documents.router)
 app.include_router(document_processing.router)
 app.include_router(extraction.router)
 app.include_router(learning.router)
+app.include_router(quality.router)
 
 
 @app.get("/")
@@ -98,5 +102,6 @@ def health():
         "documents_module": "enabled",
         "document_processing_module": "enabled",
         "extraction_module": "enabled",
-        "learning_module": "enabled"
+        "learning_module": "enabled",
+        "quality_module": "enabled"
     }

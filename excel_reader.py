@@ -42,17 +42,10 @@ def read_excel_with_config(
 
         try:
             if sheet_key == "__default__":
-                df = pd.read_excel(
-                    file_path,
-                    header=header_row - 1
-                )
+                df = pd.read_excel(file_path, header=header_row - 1)
                 sheet_name_used = None
             else:
-                df = pd.read_excel(
-                    file_path,
-                    sheet_name=sheet_key,
-                    header=header_row - 1
-                )
+                df = pd.read_excel(file_path, sheet_name=sheet_key, header=header_row - 1)
                 sheet_name_used = sheet_key
 
         except Exception as error:
@@ -61,15 +54,18 @@ def read_excel_with_config(
 
         df.columns = [str(col).strip() for col in df.columns]
 
-        for mapping in sheet_mappings:
-            column_name = mapping.column_name.strip()
+        for row_index, row in df.iterrows():
+            excel_row_number = int(row_index) + header_row + 1
+            group_key = f"doc:{document.id}|sheet:{sheet_name_used or 'default'}|row:{excel_row_number}"
 
-            if column_name not in df.columns:
-                if mapping.is_required:
-                    errors.append(f"Columna requerida no encontrada: {column_name}")
-                continue
+            for mapping in sheet_mappings:
+                column_name = mapping.column_name.strip()
 
-            for row_index, row in df.iterrows():
+                if column_name not in df.columns:
+                    if mapping.is_required:
+                        errors.append(f"Columna requerida no encontrada: {column_name}")
+                    continue
+
                 value = row.get(column_name)
 
                 if pd.isna(value):
@@ -82,6 +78,10 @@ def read_excel_with_config(
                     target_field=mapping.target_field,
                     extracted_value=str(value),
                     normalized_value=str(value).strip(),
+                    source_sheet=sheet_name_used,
+                    source_row=excel_row_number,
+                    source_column=column_name,
+                    source_group_key=group_key,
                     confidence_score="1.0",
                     status="proposed"
                 )
@@ -91,7 +91,8 @@ def read_excel_with_config(
                 results.append(
                     {
                         "sheet_name": sheet_name_used,
-                        "row_index": int(row_index) + 1,
+                        "row_number": excel_row_number,
+                        "group_key": group_key,
                         "column_name": column_name,
                         "target_entity": mapping.target_entity,
                         "target_field": mapping.target_field,

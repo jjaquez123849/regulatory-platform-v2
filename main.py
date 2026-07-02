@@ -1,110 +1,138 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime
 
-from app.core.database import Base, engine
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
-from app.models import (
-    Process,
-    ProcessField,
-    FieldOption,
-    WorkflowState,
-    WorkflowTransition,
-    WorkflowHistory,
-    DocumentType,
-    DocumentExtractionField,
-    ExcelColumnMapping,
-    Record,
-    RecordValue,
-    RecordPerson,
-    RecordRequestItem,
-    Document,
-    DocumentExtractionResult,
-    Task,
-    AuditLog,
-    ExtractionLearningExample,
-    QualityReview,
-    QualityIssue
-)
+from app.core.database import get_db
+from app.models.record import Record
+from app.models.task import Task
+from app.models.quality import QualityIssue
+from app.models.document import Document
 
-from app.routes import (
-    admin,
-    document_admin,
-    workflow_admin,
-    seed,
-    records,
-    workflow,
-    documents,
-    document_processing,
-    extraction,
-    learning,
-    quality,
-    tasks
+
+router = APIRouter(
+    prefix="/dashboard",
+    tags=["Dashboard"]
 )
 
 
-app = FastAPI(
-    title="Regulatory Platform V2",
-    version="0.1.0",
-    description="Plataforma BPM configurable con IA documental"
-)
+@router.get("/summary")
+def dashboard_summary(db: Session = Depends(get_db)):
+    records = (
+        db.query(Record)
+        .filter(Record.is_deleted == False)
+        .all()
+    )
 
+    tasks = (
+        db.query(Task)
+        .filter(Task.is_deleted == False)
+        .all()
+    )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173"
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+    open_quality_issues = (
+        db.query(QualityIssue)
+        .filter(QualityIssue.is_resolved == False)
+        .count()
+    )
 
+    documents_pending = (
+        db.query(Document)
+        .filter(
+            Document.is_deleted == False,
+            Document.processing_status.in_(["pending", "uploaded"])
+        )
+        .count()
+    )
 
-@app.on_event("startup")
-def startup():
-    Base.metadata.create_all(bind=engine)
+    now = datetime.utcnow()
 
+    overdue_tasks = [
+        task for task in tasks
+        if task.due_date
+        and task.due_date < now
+        and task.status not in ["completed", "cancelled"]
+    ]
 
-app.include_router(admin.router)
-app.include_router(document_admin.router)
-app.include_router(workflow_admin.router)
-app.include_router(seed.router)
-app.include_router(records.router)
-app.include_router(workflow.router)
-app.include_router(documents.router)
-app.include_router(document_processing.router)
-app.include_router(extraction.router)
-app.include_router(learning.router)
-app.include_router(quality.router)
-app.include_router(tasks.router)
-
-
-@app.get("/")
-def root():
     return {
-        "application": "Regulatory Platform V2",
-        "version": "0.1.0",
-        "status": "running"
+        "records_total": len(records),
+        "records_open": sum(1 for item in records if not item.closed_at),
+        "records_closed": sum(1 for item in records if item.closed_at),
+        "records_complete": sum(1 for item in records if item.is_complete),
+        "records_with_pending_items": sum(1 for item in records if item.has_pending_items),
+        "tasks_total": len(tasks),
+        "tasks_pending": sum(1 for item in tasks if item.status == "pending"),
+        "tasks_in_progress": sum(1 for item in tasks if item.status == "in_progress"),
+        "tasks_completed": sum(1 for item in tasks if item.status == "completed"),
+        "tasks_overdue": len(overdue_tasks),
+        "quality_open_issues": open_quality_issues,
+        "documents_pending_processing": documents_pending
     }
 
 
-@app.get("/health")
-def health():
+@router.get("/records-by-state")
+def records_by_state(db: Session = Depends(get_db)):
+    records = (
+        db.query(Record)
+        .filter(Record.is_deleted == False)
+        .all()
+    )
+
+    result = {}
+
+    for record in records:
+        state_id = record.current_state_id or "sin_estado"
+        result[str(state_id)] = result.get(str(state_id), 0) + 1
+
+    return result
+
+
+@router.get("/critical")
+def critical_items(db: Session = Depends(get_db)):
+    now = datetime.utcnow()
+
+    overdue_tasks = (
+        db.query(Task)
+        .filter(
+            Task.is_deleted == False,
+            Task.due_date < now,
+            Task.status.notin_(["completed", "cancelled"])
+        )
+        .order_by(Task.due_date.asc())
+        .limit(50)
+        .all()
+    )
+
+    quality_issues = (
+        db.query(QualityIssue)
+        .filter(QualityIssue.is_resolved == False)
+        .order_by(QualityIssue.created_at.desc())
+        .limit(50)
+        .all()
+    )
+
     return {
-        "status": "healthy",
-        "database": "sqlite",
-        "configuration_source": "database",
-        "admin_module": "enabled",
-        "document_admin_module": "enabled",
-        "workflow_admin_module": "enabled",
-        "seed_module": "enabled",
-        "records_module": "enabled",
-        "workflow_module": "enabled",
-        "documents_module": "enabled",
-        "document_processing_module": "enabled",
-        "extraction_module": "enabled",
-        "learning_module": "enabled",
-        "quality_module": "enabled",
-        "tasks_module": "enabled"
+        "overdue_tasks": [
+            {
+                "id": task.id,
+                "record_id": task.record_id,
+                "title": task.title,
+                "assigned_to": task.assigned_to,
+                "assigned_area": task.assigned_area,
+                "priority": task.priority,
+                "due_date": task.due_date
+            }
+            for task in overdue_tasks
+        ],
+        "quality_issues": [
+            {
+                "id": issue.id,
+                "record_id": issue.record_id,
+                "issue_type": issue.issue_type,
+                "severity": issue.severity,
+                "description": issue.description,
+                "created_at": issue.created_at
+            }
+            for issue in quality_issues
+        ]
     }

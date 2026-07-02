@@ -11,6 +11,8 @@ import {
   getProcesses,
   getProcessFields,
   createProcessField,
+  createFieldOption,
+  getFieldOptions,
 } from "./fieldsApi.js";
 
 import "../../../components/forms/forms.css";
@@ -34,6 +36,9 @@ function FieldsPage() {
   const [selectedProcessId, setSelectedProcessId] = useState("");
   const [fields, setFields] = useState([]);
 
+  const [selectedField, setSelectedField] = useState(null);
+  const [fieldOptions, setFieldOptions] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -49,6 +54,13 @@ function FieldsPage() {
     display_order: 0,
     help_text: "",
     default_value: "",
+  });
+
+  const [optionForm, setOptionForm] = useState({
+    value: "",
+    label: "",
+    display_order: 0,
+    is_active: true,
   });
 
   const loadProcesses = async () => {
@@ -80,6 +92,18 @@ function FieldsPage() {
     }
   };
 
+  const loadOptions = async (field) => {
+    setSelectedField(field);
+
+    if (!field) {
+      setFieldOptions([]);
+      return;
+    }
+
+    const response = await getFieldOptions(field.id);
+    setFieldOptions(response.data);
+  };
+
   useEffect(() => {
     loadProcesses();
   }, []);
@@ -92,6 +116,15 @@ function FieldsPage() {
     const { name, value, type, checked } = event.target;
 
     setForm((current) => ({
+      ...current,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleOptionChange = (event) => {
+    const { name, value, type, checked } = event.target;
+
+    setOptionForm((current) => ({
       ...current,
       [name]: type === "checkbox" ? checked : value,
     }));
@@ -123,6 +156,29 @@ function FieldsPage() {
     loadFields(selectedProcessId);
   };
 
+  const handleCreateOption = async (event) => {
+    event.preventDefault();
+
+    if (!selectedField) return;
+
+    await createFieldOption({
+      field_id: selectedField.id,
+      value: optionForm.value,
+      label: optionForm.label,
+      display_order: Number(optionForm.display_order || 0),
+      is_active: optionForm.is_active,
+    });
+
+    setOptionForm({
+      value: "",
+      label: "",
+      display_order: 0,
+      is_active: true,
+    });
+
+    loadOptions(selectedField);
+  };
+
   const columns = [
     { key: "display_order", label: "Orden" },
     { key: "name", label: "Nombre técnico" },
@@ -137,6 +193,29 @@ function FieldsPage() {
       key: "is_visible",
       label: "Visible",
       render: (row) => (row.is_visible ? "Sí" : "No"),
+    },
+    {
+      key: "actions",
+      label: "Opciones",
+      render: (row) =>
+        ["select", "multi_select"].includes(row.field_type) ? (
+          <Button variant="secondary" onClick={() => loadOptions(row)}>
+            Opciones
+          </Button>
+        ) : (
+          ""
+        ),
+    },
+  ];
+
+  const optionColumns = [
+    { key: "display_order", label: "Orden" },
+    { key: "value", label: "Valor" },
+    { key: "label", label: "Etiqueta" },
+    {
+      key: "is_active",
+      label: "Activo",
+      render: (row) => (row.is_active ? "Sí" : "No"),
     },
   ];
 
@@ -297,6 +376,64 @@ function FieldsPage() {
           />
         )}
       </Card>
+
+      {selectedField && (
+        <Card title={`Opciones de ${selectedField.label}`}>
+          <form onSubmit={handleCreateOption} className="simple-form">
+            <label>
+              Valor
+              <input
+                name="value"
+                value={optionForm.value}
+                onChange={handleOptionChange}
+                required
+              />
+            </label>
+
+            <label>
+              Etiqueta
+              <input
+                name="label"
+                value={optionForm.label}
+                onChange={handleOptionChange}
+                required
+              />
+            </label>
+
+            <label>
+              Orden
+              <input
+                type="number"
+                name="display_order"
+                value={optionForm.display_order}
+                onChange={handleOptionChange}
+              />
+            </label>
+
+            <label className="checkbox-row">
+              <input
+                type="checkbox"
+                name="is_active"
+                checked={optionForm.is_active}
+                onChange={handleOptionChange}
+              />
+              Activo
+            </label>
+
+            <div className="form-actions">
+              <Button type="submit">Agregar opción</Button>
+            </div>
+          </form>
+
+          <br />
+
+          <DataTable
+            columns={optionColumns}
+            data={fieldOptions}
+            emptyMessage="Este campo aún no tiene opciones."
+          />
+        </Card>
+      )}
     </>
   );
 }

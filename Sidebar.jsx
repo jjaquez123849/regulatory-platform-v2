@@ -5,6 +5,7 @@ import {
   FileText,
   FolderOpen,
   CheckSquare,
+  ShieldCheck,
   Settings
 } from "lucide-react";
 
@@ -33,6 +34,11 @@ const navItems = [
     label: "Tareas",
     path: "/tasks",
     icon: CheckSquare
+  },
+  {
+    label: "Calidad",
+    path: "/quality",
+    icon: ShieldCheck
   },
   {
     label: "Administración",

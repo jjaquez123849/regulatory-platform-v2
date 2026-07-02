@@ -20,88 +20,62 @@ def run_quality_review(
     if not record:
         raise ValueError("Registro no encontrado.")
 
-    document = None
-
     if document_id is not None:
-        document = (
-            db.query(Document)
-            .filter(Document.id == document_id)
-            .first()
-        )
-
+        document = db.query(Document).filter(Document.id == document_id).first()
         if not document:
             raise ValueError("Documento no encontrado.")
 
-    people = (
-        db.query(RecordPerson)
-        .filter(RecordPerson.record_id == record.id)
-        .all()
-    )
-
-    request_items = (
-        db.query(RecordRequestItem)
-        .filter(RecordRequestItem.record_id == record.id)
-        .all()
-    )
+    people = db.query(RecordPerson).filter(RecordPerson.record_id == record.id).all()
+    request_items = db.query(RecordRequestItem).filter(RecordRequestItem.record_id == record.id).all()
 
     issues = []
 
     if not people:
-        issues.append(
-            {
-                "issue_type": "missing_person",
-                "severity": "high",
-                "description": "No se identificaron personas asociadas al requerimiento.",
-                "person_id": None,
-                "request_item_id": None
-            }
-        )
+        issues.append({
+            "issue_type": "missing_person",
+            "severity": "high",
+            "description": "No se identificaron personas asociadas al requerimiento.",
+            "person_id": None,
+            "request_item_id": None
+        })
 
     if not request_items:
-        issues.append(
-            {
-                "issue_type": "missing_request_items",
-                "severity": "high",
-                "description": "No se identificaron solicitudes específicas dentro del requerimiento.",
-                "person_id": None,
-                "request_item_id": None
-            }
-        )
+        issues.append({
+            "issue_type": "missing_request_items",
+            "severity": "high",
+            "description": "No se identificaron solicitudes específicas dentro del requerimiento.",
+            "person_id": None,
+            "request_item_id": None
+        })
 
     for person in people:
         if not person.identification:
-            issues.append(
-                {
-                    "issue_type": "missing_identification",
-                    "severity": "medium",
-                    "description": f"La persona '{person.full_name}' no tiene identificación registrada.",
-                    "person_id": person.id,
-                    "request_item_id": None
-                }
-            )
+            issues.append({
+                "issue_type": "missing_identification",
+                "severity": "medium",
+                "description": f"La persona '{person.full_name}' no tiene identificación registrada.",
+                "person_id": person.id,
+                "request_item_id": None
+            })
 
     for item in request_items:
         if not item.is_answered:
-            issues.append(
-                {
-                    "issue_type": "unanswered_request_item",
-                    "severity": "high",
-                    "description": f"La solicitud '{item.request_type}' no está marcada como respondida.",
-                    "person_id": item.person_id,
-                    "request_item_id": item.id
-                }
-            )
+            issues.append({
+                "issue_type": "unanswered_request_item",
+                "severity": "high",
+                "description": f"La solicitud '{item.request_type}' no está marcada como respondida.",
+                "person_id": item.person_id,
+                "request_item_id": item.id
+            })
 
         if item.pending_reason:
-            issues.append(
-                {
-                    "issue_type": "pending_reason",
-                    "severity": "medium",
-                    "description": f"La solicitud '{item.request_type}' tiene pendiente: {item.pending_reason}",
-                    "person_id": item.person_id,
-                    "request_item_id": item.id
-                }
-            )
+            issues.append({
+                "issue_type": "pending_reason",
+                "severity": "medium",
+                "description": f"La solicitud '{item.request_type}' tiene pendiente: {item.pending_reason}",
+                "person_id": item.person_id,
+                "request_item_id": item.id
+            })
 
     if issues:
         status = "observed"
@@ -186,3 +160,52 @@ def list_quality_issues(
         query = query.filter(QualityIssue.is_resolved == False)
 
     return query.order_by(QualityIssue.created_at.desc()).all()
+
+
+def resolve_quality_issue(
+    db: Session,
+    issue_id: int,
+    resolved_by: str | None = None,
+    resolution_comment: str | None = None
+) -> QualityIssue | None:
+    issue = db.query(QualityIssue).filter(QualityIssue.id == issue_id).first()
+
+    if not issue:
+        return None
+
+    issue.is_resolved = True
+    issue.resolved_by = resolved_by
+    issue.resolved_at = datetime.utcnow()
+
+    db.add(
+        AuditLog(
+            record_id=issue.record_id,
+            entity_type="quality_issue",
+            entity_id=issue.id,
+            action="RESOLVE_QUALITY_ISSUE",
+            details=resolution_comment or f"Observación resuelta: {issue.description}",
+            performed_by=resolved_by
+        )
+    )
+
+    open_issues = (
+        db.query(QualityIssue)
+        .filter(
+            QualityIssue.record_id == issue.record_id,
+            QualityIssue.is_resolved == False,
+            QualityIssue.id != issue.id
+        )
+        .count()
+    )
+
+    record = get_record(db, issue.record_id)
+
+    if record and open_issues == 0:
+        record.has_pending_items = False
+        record.is_complete = True
+        record.updated_at = datetime.utcnow()
+
+    db.commit()
+    db.refresh(issue)
+
+    return issue

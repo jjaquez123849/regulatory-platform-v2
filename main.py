@@ -3,10 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.database import Base, engine
 
-# =========================
-# Models
-# =========================
-
 from app.models import (
     Process,
     ProcessField,
@@ -27,10 +23,6 @@ from app.models import (
     AuditLog
 )
 
-# =========================
-# Routes
-# =========================
-
 from app.routes import (
     admin,
     document_admin,
@@ -38,7 +30,9 @@ from app.routes import (
     seed,
     records,
     workflow,
-    documents
+    documents,
+    document_processing,
+    extraction
 )
 
 
@@ -73,6 +67,8 @@ app.include_router(seed.router)
 app.include_router(records.router)
 app.include_router(workflow.router)
 app.include_router(documents.router)
+app.include_router(document_processing.router)
+app.include_router(extraction.router)
 
 
 @app.get("/")
@@ -96,5 +92,7 @@ def health():
         "seed_module": "enabled",
         "records_module": "enabled",
         "workflow_module": "enabled",
-        "documents_module": "enabled"
+        "documents_module": "enabled",
+        "document_processing_module": "enabled",
+        "extraction_module": "enabled"
     }

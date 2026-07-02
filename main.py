@@ -35,7 +35,10 @@ from app.routes import (
     admin,
     document_admin,
     workflow_admin,
-    seed
+    seed,
+    records,
+    workflow,
+    documents
 )
 
 
@@ -67,6 +70,9 @@ app.include_router(admin.router)
 app.include_router(document_admin.router)
 app.include_router(workflow_admin.router)
 app.include_router(seed.router)
+app.include_router(records.router)
+app.include_router(workflow.router)
+app.include_router(documents.router)
 
 
 @app.get("/")
@@ -87,5 +93,8 @@ def health():
         "admin_module": "enabled",
         "document_admin_module": "enabled",
         "workflow_admin_module": "enabled",
-        "seed_module": "enabled"
+        "seed_module": "enabled",
+        "records_module": "enabled",
+        "workflow_module": "enabled",
+        "documents_module": "enabled"
     }

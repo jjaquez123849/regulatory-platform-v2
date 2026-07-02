@@ -1,4 +1,5 @@
 from datetime import datetime
+from collections import defaultdict
 
 from sqlalchemy.orm import Session
 
@@ -69,83 +70,177 @@ def apply_record_field_value(
     return existing
 
 
-def apply_person_value(
+def get_or_create_person_from_group(
     db: Session,
     record_id: int,
-    field_name: str,
-    value: str
-):
-    person = (
-        db.query(RecordPerson)
-        .filter(RecordPerson.record_id == record_id)
-        .order_by(RecordPerson.id.desc())
-        .first()
+    group_values: dict
+) -> RecordPerson:
+    full_name = group_values.get("person.full_name")
+    identification = group_values.get("person.identification")
+
+    query = db.query(RecordPerson).filter(RecordPerson.record_id == record_id)
+
+    if identification:
+        existing = query.filter(RecordPerson.identification == identification).first()
+        if existing:
+            return existing
+
+    if full_name:
+        existing = query.filter(RecordPerson.full_name == full_name).first()
+        if existing:
+            return existing
+
+    person = RecordPerson(
+        record_id=record_id,
+        full_name=full_name or "Pendiente identificar",
+        identification=identification,
+        identification_type=group_values.get("person.identification_type"),
+        role=group_values.get("person.role"),
+        notes=group_values.get("person.notes"),
+        source="document_extraction",
+        confidence_score="1.0",
+        created_at=datetime.utcnow()
     )
 
-    if not person:
-        person = RecordPerson(
-            record_id=record_id,
-            full_name="Pendiente identificar",
-            created_at=datetime.utcnow()
-        )
-        db.add(person)
-        db.flush()
-
-    if field_name == "full_name":
-        person.full_name = value
-    elif field_name == "identification":
-        person.identification = value
-    elif field_name == "identification_type":
-        person.identification_type = value
-    elif field_name == "role":
-        person.role = value
-    else:
-        person.notes = f"{field_name}: {value}"
+    db.add(person)
+    db.flush()
 
     return person
 
 
-def apply_request_item_value(
+def get_or_create_request_item_from_group(
     db: Session,
     record_id: int,
-    field_name: str,
-    value: str
-):
-    item = (
-        db.query(RecordRequestItem)
-        .filter(RecordRequestItem.record_id == record_id)
-        .order_by(RecordRequestItem.id.desc())
-        .first()
+    person_id: int | None,
+    group_values: dict
+) -> RecordRequestItem:
+    request_type = (
+        group_values.get("request_item.request_type")
+        or group_values.get("request_item.status")
+        or "pendiente_clasificar"
     )
 
-    if not item:
+    description_parts = []
+
+    for key, value in group_values.items():
+        if key.startswith("request_item.") and key not in [
+            "request_item.request_type",
+            "request_item.status",
+            "request_item.pending_reason",
+            "request_item.response_summary",
+            "request_item.is_answered"
+        ]:
+            description_parts.append(f"{key.replace('request_item.', '')}: {value}")
+
+    existing = None
+
+    if person_id:
+        existing = (
+            db.query(RecordRequestItem)
+            .filter(
+                RecordRequestItem.record_id == record_id,
+                RecordRequestItem.person_id == person_id,
+                RecordRequestItem.request_type == request_type
+            )
+            .first()
+        )
+
+    if existing:
+        item = existing
+    else:
         item = RecordRequestItem(
             record_id=record_id,
-            request_type="pendiente_clasificar",
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
+            person_id=person_id,
+            request_type=request_type,
+            created_at=datetime.utcnow()
         )
         db.add(item)
         db.flush()
 
-    if field_name == "request_type":
-        item.request_type = value
-    elif field_name == "description":
-        item.description = value
-    elif field_name == "status":
-        item.status = value
-    elif field_name == "pending_reason":
-        item.pending_reason = value
-    elif field_name == "response_summary":
-        item.response_summary = value
-    elif field_name == "is_answered":
-        item.is_answered = str(value).strip().lower() in ["true", "1", "yes", "si", "sí"]
-    else:
-        item.description = f"{item.description or ''}\n{field_name}: {value}".strip()
+    if description_parts:
+        item.description = "\n".join(description_parts)
+
+    if group_values.get("request_item.status"):
+        item.status = group_values.get("request_item.status")
+
+    if group_values.get("request_item.pending_reason"):
+        item.pending_reason = group_values.get("request_item.pending_reason")
+
+    if group_values.get("request_item.response_summary"):
+        item.response_summary = group_values.get("request_item.response_summary")
+
+    if group_values.get("request_item.is_answered") is not None:
+        item.is_answered = str(group_values.get("request_item.is_answered")).strip().lower() in [
+            "true", "1", "yes", "si", "sí", "respondido", "completo"
+        ]
 
     item.updated_at = datetime.utcnow()
 
     return item
+
+
+def apply_grouped_results(
+    db: Session,
+    record,
+    grouped_results: dict
+) -> int:
+    applied_count = 0
+
+    for group_key, results in grouped_results.items():
+        group_values = {}
+
+        for result in results:
+            value = result.normalized_value or result.extracted_value
+
+            if not value:
+                continue
+
+            key = f"{result.target_entity}.{result.target_field}"
+            group_values[key] = value
+
+        for result in results:
+            value = result.normalized_value or result.extracted_value
+
+            if not value:
+                continue
+
+            if result.target_entity == "record":
+                apply_record_field_value(
+                    db=db,
+                    record_id=record.id,
+                    process_id=record.process_id,
+                    field_name=result.target_field,
+                    value=value
+                )
+
+                result.status = "applied"
+                result.reviewed_at = datetime.utcnow()
+                applied_count += 1
+
+        person = None
+
+        if any(key.startswith("person.") for key in group_values.keys()):
+            person = get_or_create_person_from_group(
+                db=db,
+                record_id=record.id,
+                group_values=group_values
+            )
+
+        if any(key.startswith("request_item.") for key in group_values.keys()):
+            get_or_create_request_item_from_group(
+                db=db,
+                record_id=record.id,
+                person_id=person.id if person else None,
+                group_values=group_values
+            )
+
+        for result in results:
+            if result.target_entity in ["person", "request_item"]:
+                result.status = "applied"
+                result.reviewed_at = datetime.utcnow()
+                applied_count += 1
+
+    return applied_count
 
 
 def apply_extraction_results(
@@ -169,7 +264,6 @@ def apply_extraction_results(
             "applied_count": 0
         }
 
-    applied_count = 0
     record_id = results[0].record_id
 
     if not record_id:
@@ -182,42 +276,21 @@ def apply_extraction_results(
     if not record:
         raise ValueError("Registro no encontrado.")
 
+    grouped_results = defaultdict(list)
+
     for result in results:
-        value = result.normalized_value or result.extracted_value
+        group_key = result.source_group_key or f"result:{result.id}"
+        grouped_results[group_key].append(result)
 
-        if not value:
-            continue
+    applied_count = apply_grouped_results(
+        db=db,
+        record=record,
+        grouped_results=grouped_results
+    )
 
-        if result.target_entity == "record":
-            apply_record_field_value(
-                db=db,
-                record_id=record.id,
-                process_id=record.process_id,
-                field_name=result.target_field,
-                value=value
-            )
-
-        elif result.target_entity == "person":
-            apply_person_value(
-                db=db,
-                record_id=record.id,
-                field_name=result.target_field,
-                value=value
-            )
-
-        elif result.target_entity == "request_item":
-            apply_request_item_value(
-                db=db,
-                record_id=record.id,
-                field_name=result.target_field,
-                value=value
-            )
-
-        result.status = "applied"
-        result.reviewed_by = performed_by
-        result.reviewed_at = datetime.utcnow()
-
-        applied_count += 1
+    for result in results:
+        if result.status == "applied":
+            result.reviewed_by = performed_by
 
     db.add(
         AuditLog(
@@ -225,7 +298,7 @@ def apply_extraction_results(
             entity_type="document",
             entity_id=document_id,
             action="APPLY_EXTRACTION_RESULTS",
-            details=f"Resultados aplicados: {applied_count}",
+            details=f"Resultados aplicados por grupos: {applied_count}",
             performed_by=performed_by
         )
     )
@@ -236,5 +309,6 @@ def apply_extraction_results(
         "status": "applied",
         "document_id": document_id,
         "record_id": record.id,
+        "groups_count": len(grouped_results),
         "applied_count": applied_count
     }

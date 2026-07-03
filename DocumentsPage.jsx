@@ -122,6 +122,10 @@ function DocumentsPage() {
             Procesar
           </Button>
 
+          <Link to={`/documents/${row.id}/understanding`}>
+            Ver comprensión
+          </Link>
+
           <Link to={`/documents/${row.id}/extraction`}>
             Revisar extracción
           </Link>

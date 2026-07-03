@@ -51,6 +51,7 @@ from app.routes import (
     notifications,
     ai_admin,
     document_classification,
+    document_understanding,
 )
 
 
@@ -97,6 +98,7 @@ app.include_router(automation.router)
 app.include_router(notifications.router)
 app.include_router(ai_admin.router)
 app.include_router(document_classification.router)
+app.include_router(document_understanding.router)
 
 
 @app.get("/")
@@ -133,4 +135,5 @@ def health():
         "notifications_module": "enabled",
         "ai_admin_module": "enabled",
         "document_classification_module": "enabled",
+        "document_understanding_module": "enabled",
     }

@@ -106,6 +106,7 @@ app.include_router(iam.router)
 app.include_router(workspace.router)
 app.include_router(comments.router)
 app.include_router(log_edit.router)
+app.include_router(work_queues.router)
 
 app.include_router(admin.router)
 app.include_router(document_admin.router)
@@ -128,7 +129,7 @@ app.include_router(ai_admin.router)
 app.include_router(document_classification.router)
 app.include_router(document_understanding.router)
 app.include_router(system.router)
-app.include_router(work_queues.router)
+
 
 @app.get("/")
 def root():
@@ -151,6 +152,7 @@ def health():
         "workspace_module": "enabled",
         "comments_module": "enabled",
         "log_edit_module": "enabled",
+        "work_queues_module": "enabled",
         "admin_module": "enabled",
         "document_admin_module": "enabled",
         "workflow_admin_module": "enabled",
@@ -172,5 +174,4 @@ def health():
         "document_classification_module": "enabled",
         "document_understanding_module": "enabled",
         "system_module": "enabled",
-        "work_queues_module": "enabled",
     }

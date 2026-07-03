@@ -23,7 +23,10 @@ from app.models import (
     AuditLog,
     ExtractionLearningExample,
     QualityReview,
-    QualityIssue
+    QualityIssue,
+    AutomationRule,
+    AutomationCondition,
+    AutomationAction,
 )
 
 from app.routes import (
@@ -40,14 +43,16 @@ from app.routes import (
     quality,
     tasks,
     dashboard,
-    log_view
+    log_view,
+    automation_admin,
+    automation,
 )
 
 
 app = FastAPI(
     title="Regulatory Platform V2",
     version="0.1.0",
-    description="Plataforma BPM configurable con IA documental"
+    description="Plataforma BPM configurable con IA documental",
 )
 
 
@@ -55,7 +60,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "http://127.0.0.1:5173"
+        "http://127.0.0.1:5173",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -82,6 +87,8 @@ app.include_router(quality.router)
 app.include_router(tasks.router)
 app.include_router(dashboard.router)
 app.include_router(log_view.router)
+app.include_router(automation_admin.router)
+app.include_router(automation.router)
 
 
 @app.get("/")
@@ -89,7 +96,7 @@ def root():
     return {
         "application": "Regulatory Platform V2",
         "version": "0.1.0",
-        "status": "running"
+        "status": "running",
     }
 
 
@@ -112,5 +119,7 @@ def health():
         "quality_module": "enabled",
         "tasks_module": "enabled",
         "dashboard_module": "enabled",
-        "log_view_module": "enabled"
+        "log_view_module": "enabled",
+        "automation_admin_module": "enabled",
+        "automation_engine": "enabled",
     }

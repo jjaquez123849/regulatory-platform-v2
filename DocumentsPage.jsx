@@ -14,6 +14,7 @@ import {
   getDocuments,
   uploadDocument,
   classifyDocument,
+  understandDocument,
   processDocument,
 } from "./documentsApi.js";
 
@@ -86,6 +87,11 @@ function DocumentsPage() {
     loadData();
   };
 
+  const handleUnderstand = async (documentId) => {
+    await understandDocument(documentId);
+    loadData();
+  };
+
   const handleProcess = async (documentId) => {
     await processDocument(documentId);
     loadData();
@@ -108,6 +114,10 @@ function DocumentsPage() {
             Clasificar
           </Button>
 
+          <Button variant="secondary" onClick={() => handleUnderstand(row.id)}>
+            Entender
+          </Button>
+
           <Button variant="secondary" onClick={() => handleProcess(row.id)}>
             Procesar
           </Button>
@@ -124,7 +134,7 @@ function DocumentsPage() {
     <>
       <PageHeader
         title="Documentos"
-        description="Carga, clasificación, lectura y procesamiento documental."
+        description="Carga, clasificación, comprensión y procesamiento documental."
       />
 
       <Card title="Cargar documento">

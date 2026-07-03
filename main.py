@@ -68,6 +68,7 @@ from app.routes import (
     auth,
     security_seed,
     iam,
+    workspace,
 )
 
 
@@ -98,6 +99,7 @@ def startup():
 app.include_router(auth.router)
 app.include_router(security_seed.router)
 app.include_router(iam.router)
+app.include_router(workspace.router)
 app.include_router(admin.router)
 app.include_router(document_admin.router)
 app.include_router(workflow_admin.router)
@@ -139,6 +141,7 @@ def health():
         "auth_module": "enabled",
         "security_seed_module": "enabled",
         "iam_module": "enabled",
+        "workspace_module": "enabled",
         "admin_module": "enabled",
         "document_admin_module": "enabled",
         "workflow_admin_module": "enabled",

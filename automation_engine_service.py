@@ -336,6 +336,62 @@ def execute_action(
             "request_item_id": item.id
         }
 
+    if action.action_type == AutomationAction.COMPLETE_TASK:
+        from app.models.task import Task
+
+        task_id = payload.get("task_id") or get_context_value(context, "task.id")
+
+        if not task_id:
+            return {
+                "action": action.action_type,
+                "status": "error",
+                "reason": "Falta task_id"
+            }
+
+        task = db.query(Task).filter(Task.id == task_id).first()
+
+        if not task:
+            return {
+                "action": action.action_type,
+                "status": "error",
+                "reason": "Tarea no encontrada"
+            }
+
+        task.status = "completed"
+        task.completed_by = "automation"
+        task.completed_at = datetime.utcnow()
+
+        return {
+            "action": action.action_type,
+            "status": "executed",
+            "task_id": task.id
+        }
+
+    if action.action_type == AutomationAction.SEND_NOTIFICATION:
+        from app.models.notification import Notification
+
+        record_id = payload.get("record_id") or get_context_value(context, "record.id")
+
+        notification = Notification(
+            record_id=record_id,
+            title=payload.get("title", "Notificación automática"),
+            message=payload.get("message"),
+            recipient_user=payload.get("recipient_user"),
+            recipient_area=payload.get("recipient_area"),
+            priority=payload.get("priority", "medium"),
+            status="unread",
+            created_at=datetime.utcnow()
+        )
+
+        db.add(notification)
+        db.flush()
+
+        return {
+            "action": action.action_type,
+            "status": "executed",
+            "notification_id": notification.id
+        }
+
     return {
         "action": action.action_type,
         "status": "skipped",

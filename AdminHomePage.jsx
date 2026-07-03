@@ -43,6 +43,11 @@ function AdminHomePage() {
           <Link to="/admin/ai">Abrir configuración IA</Link>
         </Card>
 
+        <Card title="IA Local Offline">
+          <p>Configurar modelos locales descargados previamente y probarlos sin internet.</p>
+          <Link to="/admin/local-ai">Abrir IA local</Link>
+        </Card>
+
         <Card title="IAM">
           <p>Administrar usuarios, roles, permisos, capacidades, áreas y equipos.</p>
           <Link to="/admin/iam">Abrir IAM</Link>

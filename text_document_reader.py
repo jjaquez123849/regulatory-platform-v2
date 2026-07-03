@@ -5,6 +5,7 @@ from email.parser import BytesParser
 import docx
 from sqlalchemy.orm import Session
 
+from app.engines.ai.ai_engine_factory import get_ai_engine
 from app.models.document import Document, DocumentExtractionResult
 from app.models.document_config import DocumentExtractionField
 
@@ -65,22 +66,6 @@ def extract_text_from_docx(file_path: Path) -> str:
     return "\n".join([p.text for p in document.paragraphs]).strip()
 
 
-def simple_rule_extract(text: str, source_name: str) -> str | None:
-    lower_source = source_name.lower()
-
-    for line in text.splitlines():
-        line_clean = line.strip()
-        line_lower = line_clean.lower()
-
-        if lower_source in line_lower:
-            parts = line_clean.split(":")
-            if len(parts) > 1:
-                return parts[-1].strip()
-            return line_clean
-
-    return None
-
-
 def read_text_document_with_config(
     db: Session,
     document: Document
@@ -119,25 +104,21 @@ def read_text_document_with_config(
     if not text:
         errors.append("No se pudo extraer texto del documento.")
 
-    for field in extraction_fields:
-        value = simple_rule_extract(
-            text=text,
-            source_name=field.source_name
-        )
+    ai_engine = get_ai_engine()
+    ai_results = ai_engine.extract_fields(
+        text=text,
+        extraction_fields=extraction_fields
+    )
 
-        if not value:
-            if field.is_required:
-                errors.append(f"No se encontró campo requerido: {field.source_name}")
-            continue
-
+    for ai_result in ai_results:
         extraction = DocumentExtractionResult(
             document_id=document.id,
             record_id=document.record_id,
-            target_entity=field.target_entity,
-            target_field=field.target_field,
-            extracted_value=value,
-            normalized_value=value.strip(),
-            confidence_score="0.50",
+            target_entity=ai_result.target_entity,
+            target_field=ai_result.target_field,
+            extracted_value=str(ai_result.value),
+            normalized_value=str(ai_result.value).strip(),
+            confidence_score=str(ai_result.confidence_score),
             status="proposed"
         )
 
@@ -145,15 +126,16 @@ def read_text_document_with_config(
 
         results.append(
             {
-                "source_name": field.source_name,
-                "target_entity": field.target_entity,
-                "target_field": field.target_field,
-                "value": value,
-                "confidence_score": "0.50"
+                "target_entity": ai_result.target_entity,
+                "target_field": ai_result.target_field,
+                "value": ai_result.value,
+                "confidence_score": ai_result.confidence_score,
+                "explanation": ai_result.explanation
             }
         )
 
-    document.ai_summary = text[:2000] if text else None
+    document.ai_summary = ai_engine.summarize(text) if text else None
+    document.ai_confidence = "0.55" if results else "0.0"
     document.processing_status = "text_extracted" if not errors else "text_extracted_with_errors"
 
     db.commit()

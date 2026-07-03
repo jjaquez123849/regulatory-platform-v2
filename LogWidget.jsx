@@ -19,11 +19,13 @@ function LogWidget() {
 
   const [editing, setEditing] = useState(false);
   const [values, setValues] = useState({});
+  const [saving, setSaving] = useState(false);
 
   const getDisplayValue = (row) => {
     if (row.value_text !== null && row.value_text !== undefined) return row.value_text;
     if (row.value_number !== null && row.value_number !== undefined) return row.value_number;
     if (row.value_date !== null && row.value_date !== undefined) return row.value_date;
+
     if (row.value_boolean !== null && row.value_boolean !== undefined) {
       return row.value_boolean ? "Sí" : "No";
     }
@@ -42,6 +44,11 @@ function LogWidget() {
     setEditing(true);
   };
 
+  const cancelEdit = () => {
+    setEditing(false);
+    setValues({});
+  };
+
   const handleChange = (fieldId, value) => {
     setValues((current) => ({
       ...current,
@@ -50,17 +57,26 @@ function LogWidget() {
   };
 
   const handleSave = async () => {
-    const payload = {
-      values: Object.entries(values).map(([fieldId, value]) => ({
-        field_id: Number(fieldId),
-        value,
-      })),
-    };
+    if (!recordId) return;
 
-    await updateRecordLogValues(recordId, payload);
+    try {
+      setSaving(true);
 
-    setEditing(false);
-    refresh();
+      const payload = {
+        values: Object.entries(values).map(([fieldId, value]) => ({
+          field_id: Number(fieldId),
+          value,
+        })),
+      };
+
+      await updateRecordLogValues(recordId, payload);
+
+      setEditing(false);
+      setValues({});
+      refresh();
+    } finally {
+      setSaving(false);
+    }
   };
 
   const columns = [
@@ -91,11 +107,11 @@ function LogWidget() {
             </Button>
           ) : (
             <>
-              <Button onClick={handleSave}>
-                Guardar cambios
+              <Button onClick={handleSave} disabled={saving}>
+                {saving ? "Guardando..." : "Guardar cambios"}
               </Button>
 
-              <Button variant="secondary" onClick={() => setEditing(false)}>
+              <Button variant="secondary" onClick={cancelEdit} disabled={saving}>
                 Cancelar
               </Button>
             </>

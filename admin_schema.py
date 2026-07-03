@@ -356,4 +356,31 @@ class AutomationActionCreate(BaseModel):
     action_payload: Optional[str] = None
     display_order: int = 0
     is_active: bool = True
+
+# =========================
+# AI Configurations
+# =========================
+
+class AIConfigurationCreate(BaseModel):
+    process_id: int
+    document_type_id: Optional[int] = None
+    name: str
+    purpose: str
+    instructions: Optional[str] = None
+    expected_output: Optional[str] = None
+    is_active: bool = True
+
+
+class AIConfigurationResponse(BaseModel):
+    id: int
+    process_id: int
+    document_type_id: Optional[int] = None
+    name: str
+    purpose: str
+    instructions: Optional[str] = None
+    expected_output: Optional[str] = None
+    is_active: bool
+
+    class Config:
+        from_attributes = True
     

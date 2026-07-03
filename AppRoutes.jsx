@@ -11,6 +11,7 @@ import ExtractionResultsPage from "../../features/extraction/ExtractionResultsPa
 import TasksPage from "../../features/tasks/TasksPage.jsx";
 import QualityPage from "../../features/quality/QualityPage.jsx";
 import NotificationsPage from "../../features/notifications/NotificationsPage.jsx";
+import SystemDiagnosticsPage from "../../features/system/SystemDiagnosticsPage.jsx";
 
 import AdminHomePage from "../../features/admin/AdminHomePage.jsx";
 import ProcessesPage from "../../features/admin/processes/ProcessesPage.jsx";
@@ -35,6 +36,7 @@ function AppRoutes() {
         <Route path="/tasks" element={<TasksPage />} />
         <Route path="/quality" element={<QualityPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/system" element={<SystemDiagnosticsPage />} />
 
         <Route path="/admin" element={<AdminHomePage />} />
         <Route path="/admin/processes" element={<ProcessesPage />} />

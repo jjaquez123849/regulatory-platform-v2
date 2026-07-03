@@ -21,6 +21,10 @@ export function uploadDocument(formData) {
   });
 }
 
+export function classifyDocument(documentId) {
+  return apiClient.post(`/document-classification/${documentId}/classify`);
+}
+
 export function processDocument(documentId) {
   return apiClient.post(`/document-processing/${documentId}/process`);
 }

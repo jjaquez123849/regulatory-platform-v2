@@ -57,6 +57,7 @@ from app.routes import (
     document_understanding,
     system,
     auth,
+    security_seed,
 )
 
 
@@ -85,6 +86,7 @@ def startup():
 
 
 app.include_router(auth.router)
+app.include_router(security_seed.router)
 app.include_router(admin.router)
 app.include_router(document_admin.router)
 app.include_router(workflow_admin.router)
@@ -124,6 +126,7 @@ def health():
         "database": "sqlite",
         "configuration_source": "database",
         "auth_module": "enabled",
+        "security_seed_module": "enabled",
         "admin_module": "enabled",
         "document_admin_module": "enabled",
         "workflow_admin_module": "enabled",

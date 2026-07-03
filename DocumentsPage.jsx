@@ -13,6 +13,7 @@ import {
   getDocumentTypes,
   getDocuments,
   uploadDocument,
+  classifyDocument,
   processDocument,
 } from "./documentsApi.js";
 
@@ -46,7 +47,7 @@ function DocumentsPage() {
       setDocumentTypes(typesResponse.data);
       setDocuments(documentsResponse.data);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Error cargando documentos");
     } finally {
       setLoading(false);
     }
@@ -80,6 +81,11 @@ function DocumentsPage() {
     loadData();
   };
 
+  const handleClassify = async (documentId) => {
+    await classifyDocument(documentId);
+    loadData();
+  };
+
   const handleProcess = async (documentId) => {
     await processDocument(documentId);
     loadData();
@@ -98,6 +104,10 @@ function DocumentsPage() {
       label: "Acciones",
       render: (row) => (
         <div className="row-actions">
+          <Button variant="secondary" onClick={() => handleClassify(row.id)}>
+            Clasificar
+          </Button>
+
           <Button variant="secondary" onClick={() => handleProcess(row.id)}>
             Procesar
           </Button>
@@ -114,7 +124,7 @@ function DocumentsPage() {
     <>
       <PageHeader
         title="Documentos"
-        description="Carga, lectura y procesamiento documental."
+        description="Carga, clasificación, lectura y procesamiento documental."
       />
 
       <Card title="Cargar documento">
@@ -140,7 +150,7 @@ function DocumentsPage() {
               value={documentTypeId}
               onChange={(event) => setDocumentTypeId(event.target.value)}
             >
-              <option value="">Seleccione...</option>
+              <option value="">Detectar automáticamente</option>
               {documentTypes.map((type) => (
                 <option key={type.id} value={type.id}>
                   {type.name}

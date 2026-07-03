@@ -245,6 +245,97 @@ def execute_action(
             "to_state_id": target_state.id
         }
 
+    if action.action_type == AutomationAction.UPDATE_RECORD:
+        from app.services.record_service import update_record
+
+        record_id = payload.get("record_id") or get_context_value(context, "record.id")
+
+        if not record_id:
+            return {
+                "action": action.action_type,
+                "status": "error",
+                "reason": "Falta record_id"
+            }
+
+        record = update_record(
+            db=db,
+            record_id=record_id,
+            data=payload.get("data", {})
+        )
+
+        return {
+            "action": action.action_type,
+            "status": "executed" if record else "error",
+            "record_id": record_id
+        }
+
+    if action.action_type == AutomationAction.CREATE_PERSON:
+        from app.models.record import RecordPerson
+
+        record_id = payload.get("record_id") or get_context_value(context, "record.id")
+
+        if not record_id:
+            return {
+                "action": action.action_type,
+                "status": "error",
+                "reason": "Falta record_id"
+            }
+
+        person = RecordPerson(
+            record_id=record_id,
+            full_name=payload.get("full_name", "Pendiente identificar"),
+            identification=payload.get("identification"),
+            identification_type=payload.get("identification_type"),
+            role=payload.get("role"),
+            notes=payload.get("notes"),
+            source="automation",
+            confidence_score="1.0",
+            created_at=datetime.utcnow()
+        )
+
+        db.add(person)
+        db.flush()
+
+        return {
+            "action": action.action_type,
+            "status": "executed",
+            "person_id": person.id
+        }
+
+    if action.action_type == AutomationAction.CREATE_REQUEST_ITEM:
+        from app.models.record import RecordRequestItem
+
+        record_id = payload.get("record_id") or get_context_value(context, "record.id")
+
+        if not record_id:
+            return {
+                "action": action.action_type,
+                "status": "error",
+                "reason": "Falta record_id"
+            }
+
+        item = RecordRequestItem(
+            record_id=record_id,
+            person_id=payload.get("person_id"),
+            request_type=payload.get("request_type", "pendiente_clasificar"),
+            description=payload.get("description"),
+            status=payload.get("status", "pending"),
+            pending_reason=payload.get("pending_reason"),
+            response_summary=payload.get("response_summary"),
+            is_answered=payload.get("is_answered", False),
+            created_at=datetime.utcnow(),
+            updated_at=datetime.utcnow()
+        )
+
+        db.add(item)
+        db.flush()
+
+        return {
+            "action": action.action_type,
+            "status": "executed",
+            "request_item_id": item.id
+        }
+
     return {
         "action": action.action_type,
         "status": "skipped",

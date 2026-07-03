@@ -32,6 +32,10 @@ function AdminHomePage() {
           <p>Configurar estados y transiciones del proceso.</p>
           <Link to="/admin/workflow">Abrir workflow</Link>
         </Card>
+        <Card title="Automatizaciones">
+          <p>Configurar reglas: cuándo ocurre algo, si se cumple condición, ejecutar acciones.</p>
+          <Link to="/admin/automation">Abrir automatizaciones</Link>
+        </Card>
       </div>
     </>
   );

@@ -9,6 +9,7 @@ import DocumentsPage from "../../features/documents/DocumentsPage.jsx";
 import ExtractionResultsPage from "../../features/extraction/ExtractionResultsPage.jsx";
 import TasksPage from "../../features/tasks/TasksPage.jsx";
 import QualityPage from "../../features/quality/QualityPage.jsx";
+import NotificationsPage from "../../features/notifications/NotificationsPage.jsx";
 
 import AdminHomePage from "../../features/admin/AdminHomePage.jsx";
 import ProcessesPage from "../../features/admin/processes/ProcessesPage.jsx";
@@ -28,6 +29,7 @@ function AppRoutes() {
         <Route path="/documents/:documentId/extraction" element={<ExtractionResultsPage />} />
         <Route path="/tasks" element={<TasksPage />} />
         <Route path="/quality" element={<QualityPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
 
         <Route path="/admin" element={<AdminHomePage />} />
         <Route path="/admin/processes" element={<ProcessesPage />} />

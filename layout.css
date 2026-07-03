@@ -81,3 +81,18 @@
 .app-content {
   padding: 24px;
 }
+
+.topbar {
+  justify-content: space-between;
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbar-user span {
+  color: var(--muted);
+  font-size: 13px;
+}

@@ -76,6 +76,7 @@ from app.routes import (
     work_queues,
     log_intelligence,
     local_ai,
+    workspace_ai,
 )
 
 
@@ -134,6 +135,7 @@ app.include_router(ai_admin.router)
 app.include_router(document_classification.router)
 app.include_router(document_understanding.router)
 app.include_router(system.router)
+app.include_router(workspace_ai.router)
 
 
 @app.get("/")
@@ -181,4 +183,5 @@ def health():
         "document_classification_module": "enabled",
         "document_understanding_module": "enabled",
         "system_module": "enabled",
+        "workspace_ai_module": "enabled",
     }

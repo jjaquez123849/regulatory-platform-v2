@@ -32,3 +32,7 @@ export function processDocument(documentId) {
 export function understandDocument(documentId) {
   return apiClient.post(`/document-understanding/${documentId}/understand`);
 }
+
+export function getDocumentUnderstandingHistory(documentId) {
+  return apiClient.get(`/document-understanding/${documentId}/history`);
+}

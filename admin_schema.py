@@ -307,4 +307,53 @@ class WorkflowTransitionResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+# =========================
+# Automation Rules
+# =========================
+
+class AutomationRuleCreate(BaseModel):
+    process_id: int
+    code: str
+    name: str
+    description: Optional[str] = None
+    trigger_event: str
+    is_active: bool = True
+
+
+class AutomationRuleUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    trigger_event: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
+class AutomationRuleResponse(BaseModel):
+    id: int
+    process_id: int
+    code: str
+    name: str
+    description: Optional[str] = None
+    trigger_event: str
+    is_active: bool
+
+    class Config:
+        from_attributes = True
+
+
+class AutomationConditionCreate(BaseModel):
+    rule_id: int
+    left_value: str
+    operator: str
+    right_value: Optional[str] = None
+    display_order: int = 0
+    is_active: bool = True
+
+
+class AutomationActionCreate(BaseModel):
+    rule_id: int
+    action_type: str
+    action_payload: Optional[str] = None
+    display_order: int = 0
+    is_active: bool = True
     

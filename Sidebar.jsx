@@ -7,6 +7,7 @@ import {
   CheckSquare,
   ShieldCheck,
   Bell,
+  Activity,
   Settings,
 } from "lucide-react";
 
@@ -45,6 +46,11 @@ const navItems = [
     label: "Notificaciones",
     path: "/notifications",
     icon: Bell,
+  },
+  {
+    label: "Sistema",
+    path: "/system",
+    icon: Activity,
   },
   {
     label: "Administración",

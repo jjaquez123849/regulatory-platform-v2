@@ -24,6 +24,7 @@ import DocumentTypesPage from "../../features/admin/documents/DocumentTypesPage.
 import WorkflowPage from "../../features/admin/workflow/WorkflowPage.jsx";
 import AutomationPage from "../../features/admin/automation/AutomationPage.jsx";
 import AIConfigPage from "../../features/admin/ai/AIConfigPage.jsx";
+import LocalAIPage from "../../features/admin/localAi/LocalAIPage.jsx";
 import IAMPage from "../../features/admin/iam/IAMPage.jsx";
 
 function AppRoutes() {
@@ -45,14 +46,8 @@ function AppRoutes() {
         <Route path="/records/:recordId/workspace" element={<WorkspacePage />} />
 
         <Route path="/documents" element={<DocumentsPage />} />
-        <Route
-          path="/documents/:documentId/understanding"
-          element={<DocumentUnderstandingPage />}
-        />
-        <Route
-          path="/documents/:documentId/extraction"
-          element={<ExtractionResultsPage />}
-        />
+        <Route path="/documents/:documentId/understanding" element={<DocumentUnderstandingPage />} />
+        <Route path="/documents/:documentId/extraction" element={<ExtractionResultsPage />} />
 
         <Route path="/tasks" element={<TasksPage />} />
         <Route path="/quality" element={<QualityPage />} />
@@ -66,6 +61,7 @@ function AppRoutes() {
         <Route path="/admin/workflow" element={<WorkflowPage />} />
         <Route path="/admin/automation" element={<AutomationPage />} />
         <Route path="/admin/ai" element={<AIConfigPage />} />
+        <Route path="/admin/local-ai" element={<LocalAIPage />} />
         <Route path="/admin/iam" element={<IAMPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />

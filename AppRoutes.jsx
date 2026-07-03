@@ -9,12 +9,13 @@ import DocumentsPage from "../../features/documents/DocumentsPage.jsx";
 import ExtractionResultsPage from "../../features/extraction/ExtractionResultsPage.jsx";
 import TasksPage from "../../features/tasks/TasksPage.jsx";
 import QualityPage from "../../features/quality/QualityPage.jsx";
-import AutomationPage from "../../features/admin/automation/AutomationPage.jsx";
+
 import AdminHomePage from "../../features/admin/AdminHomePage.jsx";
 import ProcessesPage from "../../features/admin/processes/ProcessesPage.jsx";
 import FieldsPage from "../../features/admin/fields/FieldsPage.jsx";
 import DocumentTypesPage from "../../features/admin/documents/DocumentTypesPage.jsx";
 import WorkflowPage from "../../features/admin/workflow/WorkflowPage.jsx";
+import AutomationPage from "../../features/admin/automation/AutomationPage.jsx";
 
 function AppRoutes() {
   return (

@@ -304,6 +304,36 @@ def apply_extraction_results(
     )
 
     db.commit()
+    try:
+        from app.core.automation_events import AutomationEvent
+        from app.services.automation_engine_service import run_automation_event
+
+        run_automation_event(
+            db=db,
+            process_id=record.process_id,
+            trigger_event=AutomationEvent.EXTRACTION_COMPLETED,
+            context={
+                "record": {
+                    "id": record.id,
+                    "process_id": record.process_id,
+                    "current_state_id": record.current_state_id,
+                    "is_complete": record.is_complete,
+                    "has_pending_items": record.has_pending_items,
+                },
+                "document": {
+                    "id": document_id,
+                },
+                "extraction": {
+                    "applied_count": applied_count,
+                    "groups_count": len(grouped_results),
+                },
+                "event": {
+                    "name": AutomationEvent.EXTRACTION_COMPLETED,
+                },
+            }
+        )
+    except Exception:
+        pass
 
     return {
         "status": "applied",

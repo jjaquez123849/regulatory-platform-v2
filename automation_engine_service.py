@@ -178,6 +178,73 @@ def execute_action(
             "quality_review_id": result.id
         }
 
+    if action.action_type == AutomationAction.CHANGE_STATE:
+        from app.models.record import Record
+        from app.models.workflow import WorkflowHistory, WorkflowState
+
+        record_id = payload.get("record_id") or get_context_value(context, "record.id")
+        to_state_id = payload.get("to_state_id")
+
+        if not record_id or not to_state_id:
+            return {
+                "action": action.action_type,
+                "status": "error",
+                "reason": "Falta record_id o to_state_id"
+            }
+
+        record = db.query(Record).filter(Record.id == record_id).first()
+
+        if not record:
+            return {
+                "action": action.action_type,
+                "status": "error",
+                "reason": "Registro no encontrado"
+            }
+
+        target_state = (
+            db.query(WorkflowState)
+            .filter(
+                WorkflowState.id == int(to_state_id),
+                WorkflowState.process_id == record.process_id
+            )
+            .first()
+        )
+
+        if not target_state:
+            return {
+                "action": action.action_type,
+                "status": "error",
+                "reason": "Estado destino no válido"
+            }
+
+        previous_state_id = record.current_state_id
+        record.current_state_id = target_state.id
+        record.updated_at = datetime.utcnow()
+
+        if target_state.is_final:
+            record.closed_at = datetime.utcnow()
+            record.is_complete = True
+
+        db.add(
+            WorkflowHistory(
+                record_id=record.id,
+                transition_id=None,
+                from_state_id=previous_state_id,
+                to_state_id=target_state.id,
+                comment="Cambio de estado ejecutado por automatización",
+                performed_by="automation",
+                performed_at=datetime.utcnow()
+            )
+        )
+
+        return {
+            "action": action.action_type,
+            "status": "executed",
+            "record_id": record.id,
+            "from_state_id": previous_state_id,
+            "to_state_id": target_state.id
+        }
+
     return {
         "action": action.action_type,
         "status": "skipped",

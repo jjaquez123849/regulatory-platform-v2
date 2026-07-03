@@ -1,7 +1,10 @@
+import json
+
 from sqlalchemy.orm import Session
 
 from app.domains.iam.services.authorization_service import AuthorizationService
 from app.models.audit import AuditLog
+from app.models.comment import Comment
 from app.models.document import Document
 from app.models.document_understanding import DocumentUnderstandingResult
 from app.models.notification import Notification
@@ -11,17 +14,10 @@ from app.models.task import Task
 from app.models.workflow import WorkflowHistory, WorkflowState
 
 
-def get_record_workspace(
-    db: Session,
-    record_id: int,
-    current_user
-) -> dict:
+def get_record_workspace(db: Session, record_id: int, current_user) -> dict:
     record = (
         db.query(Record)
-        .filter(
-            Record.id == record_id,
-            Record.is_deleted == False
-        )
+        .filter(Record.id == record_id, Record.is_deleted == False)
         .first()
     )
 
@@ -31,7 +27,6 @@ def get_record_workspace(
     authorization = AuthorizationService(db)
 
     current_state = None
-
     if record.current_state_id:
         current_state = (
             db.query(WorkflowState)
@@ -39,18 +34,8 @@ def get_record_workspace(
             .first()
         )
 
-    values = (
-        db.query(RecordValue)
-        .filter(RecordValue.record_id == record.id)
-        .all()
-    )
-
-    people = (
-        db.query(RecordPerson)
-        .filter(RecordPerson.record_id == record.id)
-        .all()
-    )
-
+    values = db.query(RecordValue).filter(RecordValue.record_id == record.id).all()
+    people = db.query(RecordPerson).filter(RecordPerson.record_id == record.id).all()
     request_items = (
         db.query(RecordRequestItem)
         .filter(RecordRequestItem.record_id == record.id)
@@ -59,20 +44,14 @@ def get_record_workspace(
 
     documents = (
         db.query(Document)
-        .filter(
-            Document.record_id == record.id,
-            Document.is_deleted == False
-        )
+        .filter(Document.record_id == record.id, Document.is_deleted == False)
         .order_by(Document.uploaded_at.desc())
         .all()
     )
 
     tasks = (
         db.query(Task)
-        .filter(
-            Task.record_id == record.id,
-            Task.is_deleted == False
-        )
+        .filter(Task.record_id == record.id, Task.is_deleted == False)
         .order_by(Task.created_at.desc())
         .all()
     )
@@ -108,10 +87,7 @@ def get_record_workspace(
 
     notifications = (
         db.query(Notification)
-        .filter(
-            Notification.record_id == record.id,
-            Notification.is_deleted == False
-        )
+        .filter(Notification.record_id == record.id, Notification.is_deleted == False)
         .order_by(Notification.created_at.desc())
         .all()
     )
@@ -123,6 +99,13 @@ def get_record_workspace(
         .all()
     )
 
+    comments = (
+        db.query(Comment)
+        .filter(Comment.record_id == record.id, Comment.is_deleted == False)
+        .order_by(Comment.created_at.desc())
+        .all()
+    )
+
     timeline = []
 
     for item in workflow_history:
@@ -131,7 +114,7 @@ def get_record_workspace(
             "title": "Cambio de estado",
             "description": item.comment,
             "date": item.performed_at,
-            "type": "workflow"
+            "type": "workflow",
         })
 
     for item in documents:
@@ -140,7 +123,7 @@ def get_record_workspace(
             "title": "Documento cargado",
             "description": item.original_filename,
             "date": item.uploaded_at,
-            "type": "document"
+            "type": "document",
         })
 
     for item in quality_reviews:
@@ -149,14 +132,19 @@ def get_record_workspace(
             "title": "Revisión de calidad",
             "description": item.summary,
             "date": item.reviewed_at,
-            "type": "quality"
+            "type": "quality",
         })
 
-    timeline = sorted(
-        timeline,
-        key=lambda item: item["date"] or "",
-        reverse=True
-    )
+    for item in comments:
+        timeline.append({
+            "id": f"comment-{item.id}",
+            "title": "Comentario",
+            "description": item.comment_text,
+            "date": item.created_at,
+            "type": "comment",
+        })
+
+    timeline = sorted(timeline, key=lambda item: item["date"] or "", reverse=True)
 
     layout = [
         {
@@ -166,12 +154,7 @@ def get_record_workspace(
             "description": "Hallazgos y resumen inteligente del expediente.",
             "order": 1,
             "visible": True,
-            "widgets": [
-                {
-                    "id": "ai_summary",
-                    "widget": "AI_SUMMARY"
-                }
-            ]
+            "widgets": [{"id": "ai_summary", "widget": "AI_SUMMARY"}],
         },
         {
             "id": "timeline",
@@ -180,12 +163,7 @@ def get_record_workspace(
             "description": "Eventos principales del expediente.",
             "order": 2,
             "visible": True,
-            "widgets": [
-                {
-                    "id": "timeline",
-                    "widget": "TIMELINE"
-                }
-            ]
+            "widgets": [{"id": "timeline", "widget": "TIMELINE"}],
         },
         {
             "id": "log",
@@ -194,55 +172,65 @@ def get_record_workspace(
             "description": "Información oficial del expediente.",
             "order": 3,
             "visible": True,
+            "widgets": [{"id": "log", "widget": "LOG"}],
+        },
+        {
+            "id": "people_requests",
+            "code": "people_requests",
+            "title": "Personas y solicitudes",
+            "description": "Personas detectadas y requerimientos asociados.",
+            "order": 4,
+            "visible": True,
             "widgets": [
-                {
-                    "id": "log",
-                    "widget": "LOG"
-                }
-            ]
+                {"id": "people", "widget": "PEOPLE"},
+                {"id": "requests", "widget": "REQUESTS"},
+            ],
         },
         {
             "id": "documents",
             "code": "documents",
             "title": "Documentos",
             "description": "Documentos cargados, procesados y comprendidos.",
-            "order": 4,
+            "order": 5,
             "visible": True,
-            "widgets": [
-                {
-                    "id": "documents",
-                    "widget": "DOCUMENTS"
-                }
-            ]
+            "widgets": [{"id": "documents", "widget": "DOCUMENTS"}],
         },
         {
             "id": "tasks",
             "code": "tasks",
             "title": "Tareas",
             "description": "Tareas operativas del expediente.",
-            "order": 5,
+            "order": 6,
             "visible": True,
-            "widgets": [
-                {
-                    "id": "tasks",
-                    "widget": "TASKS"
-                }
-            ]
+            "widgets": [{"id": "tasks", "widget": "TASKS"}],
         },
         {
             "id": "quality",
             "code": "quality",
             "title": "Calidad",
             "description": "Revisiones y observaciones de calidad.",
-            "order": 6,
+            "order": 7,
             "visible": True,
-            "widgets": [
-                {
-                    "id": "quality",
-                    "widget": "QUALITY"
-                }
-            ]
-        }
+            "widgets": [{"id": "quality", "widget": "QUALITY"}],
+        },
+        {
+            "id": "comments",
+            "code": "comments",
+            "title": "Comentarios",
+            "description": "Notas internas del expediente.",
+            "order": 8,
+            "visible": True,
+            "widgets": [{"id": "comments", "widget": "COMMENTS"}],
+        },
+        {
+            "id": "audit",
+            "code": "audit",
+            "title": "Auditoría",
+            "description": "Historial técnico de acciones.",
+            "order": 9,
+            "visible": True,
+            "widgets": [{"id": "audit", "widget": "AUDIT"}],
+        },
     ]
 
     return {
@@ -277,6 +265,7 @@ def get_record_workspace(
                 "identification": item.identification,
                 "identification_type": item.identification_type,
                 "role": item.role,
+                "notes": item.notes,
             }
             for item in people
         ],
@@ -377,15 +366,24 @@ def get_record_workspace(
                 "summary": item.summary,
                 "request_number": item.request_number,
                 "due_date": item.due_date,
+                "entities": json.loads(item.entities_json or "[]"),
+                "requests": json.loads(item.requests_json or "[]"),
                 "created_at": item.created_at,
             }
             for item in understandings
         ],
+        "comments": [
+            {
+                "id": item.id,
+                "comment_text": item.comment_text,
+                "comment_type": item.comment_type,
+                "created_by": item.created_by,
+                "created_at": item.created_at,
+            }
+            for item in comments
+        ],
         "permissions": authorization.get_user_permissions(current_user),
         "capabilities": authorization.get_user_capabilities(current_user),
-        "allowed_actions": authorization.get_record_allowed_actions(
-            current_user,
-            record
-        ),
+        "allowed_actions": authorization.get_record_allowed_actions(current_user, record),
         "layout": layout,
     }

@@ -30,6 +30,8 @@ from app.models import (
     Notification,
     AIConfiguration,
     DocumentUnderstandingResult,
+    User,
+    Permission,
 )
 
 from app.routes import (
@@ -54,6 +56,7 @@ from app.routes import (
     document_classification,
     document_understanding,
     system,
+    auth,
 )
 
 
@@ -81,6 +84,7 @@ def startup():
     Base.metadata.create_all(bind=engine)
 
 
+app.include_router(auth.router)
 app.include_router(admin.router)
 app.include_router(document_admin.router)
 app.include_router(workflow_admin.router)
@@ -119,6 +123,7 @@ def health():
         "status": "healthy",
         "database": "sqlite",
         "configuration_source": "database",
+        "auth_module": "enabled",
         "admin_module": "enabled",
         "document_admin_module": "enabled",
         "workflow_admin_module": "enabled",

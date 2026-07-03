@@ -41,8 +41,14 @@ function AppRoutes() {
         <Route path="/records" element={<RecordsPage />} />
 
         <Route path="/documents" element={<DocumentsPage />} />
-        <Route path="/documents/:documentId/understanding" element={<DocumentUnderstandingPage />} />
-        <Route path="/documents/:documentId/extraction" element={<ExtractionResultsPage />} />
+        <Route
+          path="/documents/:documentId/understanding"
+          element={<DocumentUnderstandingPage />}
+        />
+        <Route
+          path="/documents/:documentId/extraction"
+          element={<ExtractionResultsPage />}
+        />
 
         <Route path="/tasks" element={<TasksPage />} />
         <Route path="/quality" element={<QualityPage />} />

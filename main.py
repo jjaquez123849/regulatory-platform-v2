@@ -72,6 +72,7 @@ from app.routes import (
     workspace,
     comments,
     log_edit,
+    work_queues,
 )
 
 
@@ -127,7 +128,7 @@ app.include_router(ai_admin.router)
 app.include_router(document_classification.router)
 app.include_router(document_understanding.router)
 app.include_router(system.router)
-
+app.include_router(work_queues.router)
 
 @app.get("/")
 def root():
@@ -171,4 +172,5 @@ def health():
         "document_classification_module": "enabled",
         "document_understanding_module": "enabled",
         "system_module": "enabled",
+        "work_queues_module": "enabled",
     }

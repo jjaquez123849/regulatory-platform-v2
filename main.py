@@ -31,7 +31,16 @@ from app.models import (
     AIConfiguration,
     DocumentUnderstandingResult,
     User,
+    Role,
     Permission,
+    Capability,
+    RolePermission,
+    RoleCapability,
+    UserRole,
+    Area,
+    Team,
+    UserTeam,
+    UserSession,
 )
 
 from app.routes import (
@@ -58,6 +67,7 @@ from app.routes import (
     system,
     auth,
     security_seed,
+    iam,
 )
 
 
@@ -87,6 +97,7 @@ def startup():
 
 app.include_router(auth.router)
 app.include_router(security_seed.router)
+app.include_router(iam.router)
 app.include_router(admin.router)
 app.include_router(document_admin.router)
 app.include_router(workflow_admin.router)
@@ -127,6 +138,7 @@ def health():
         "configuration_source": "database",
         "auth_module": "enabled",
         "security_seed_module": "enabled",
+        "iam_module": "enabled",
         "admin_module": "enabled",
         "document_admin_module": "enabled",
         "workflow_admin_module": "enabled",

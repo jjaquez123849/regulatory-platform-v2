@@ -104,7 +104,7 @@ def read_text_document_with_config(
     if not text:
         errors.append("No se pudo extraer texto del documento.")
 
-    ai_engine = get_ai_engine()
+    ai_engine = get_ai_engine(db)
     ai_results = ai_engine.extract_fields(
         text=text,
         extraction_fields=extraction_fields

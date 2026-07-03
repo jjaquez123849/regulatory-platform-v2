@@ -25,14 +25,14 @@ export function classifyDocument(documentId) {
   return apiClient.post(`/document-classification/${documentId}/classify`);
 }
 
-export function processDocument(documentId) {
-  return apiClient.post(`/document-processing/${documentId}/process`);
-}
-
 export function understandDocument(documentId) {
   return apiClient.post(`/document-understanding/${documentId}/understand`);
 }
 
 export function getDocumentUnderstandingHistory(documentId) {
   return apiClient.get(`/document-understanding/${documentId}/history`);
+}
+
+export function processDocument(documentId) {
+  return apiClient.post(`/document-processing/${documentId}/process`);
 }

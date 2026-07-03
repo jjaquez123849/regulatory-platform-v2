@@ -17,6 +17,7 @@ import FieldsPage from "../../features/admin/fields/FieldsPage.jsx";
 import DocumentTypesPage from "../../features/admin/documents/DocumentTypesPage.jsx";
 import WorkflowPage from "../../features/admin/workflow/WorkflowPage.jsx";
 import AutomationPage from "../../features/admin/automation/AutomationPage.jsx";
+import AIConfigPage from "../../features/admin/ai/AIConfigPage.jsx";
 
 function AppRoutes() {
   return (
@@ -37,6 +38,7 @@ function AppRoutes() {
         <Route path="/admin/documents" element={<DocumentTypesPage />} />
         <Route path="/admin/workflow" element={<WorkflowPage />} />
         <Route path="/admin/automation" element={<AutomationPage />} />
+        <Route path="/admin/ai" element={<AIConfigPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

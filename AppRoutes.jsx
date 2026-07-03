@@ -8,6 +8,7 @@ import DashboardPage from "../../features/dashboard/DashboardPage.jsx";
 import LogPage from "../../features/log/LogPage.jsx";
 import RecordsPage from "../../features/records/RecordsPage.jsx";
 import WorkspacePage from "../../features/workspace/WorkspacePage.jsx";
+import WorkQueuesPage from "../../features/workQueues/WorkQueuesPage.jsx";
 import DocumentsPage from "../../features/documents/DocumentsPage.jsx";
 import DocumentUnderstandingPage from "../../features/documents/DocumentUnderstandingPage.jsx";
 import ExtractionResultsPage from "../../features/extraction/ExtractionResultsPage.jsx";
@@ -38,6 +39,7 @@ function AppRoutes() {
         }
       >
         <Route path="/" element={<DashboardPage />} />
+        <Route path="/queues" element={<WorkQueuesPage />} />
         <Route path="/log" element={<LogPage />} />
         <Route path="/records" element={<RecordsPage />} />
         <Route path="/records/:recordId/workspace" element={<WorkspacePage />} />

@@ -1,10 +1,16 @@
 import re
 
+from sqlalchemy.orm import Session
+
 from app.engines.ai.ai_result import AIExtractionResult
 from app.engines.ai.base_ai_engine import BaseAIEngine
+from app.models.learning import ExtractionLearningExample
 
 
 class RuleBasedAIEngine(BaseAIEngine):
+    def __init__(self, db: Session | None = None):
+        self.db = db
+
     def extract_fields(
         self,
         text: str,
@@ -13,6 +19,25 @@ class RuleBasedAIEngine(BaseAIEngine):
         results = []
 
         for field in extraction_fields:
+            learned_value = self._extract_from_learning(
+                text=text,
+                target_entity=field.target_entity,
+                target_field=field.target_field,
+                document_type_id=field.document_type_id
+            )
+
+            if learned_value:
+                results.append(
+                    AIExtractionResult(
+                        target_entity=field.target_entity,
+                        target_field=field.target_field,
+                        value=learned_value,
+                        confidence_score=0.75,
+                        explanation="Valor sugerido usando ejemplos aprendidos."
+                    )
+                )
+                continue
+
             value = self._extract_by_field_name(
                 text=text,
                 source_name=field.source_name,
@@ -71,6 +96,47 @@ class RuleBasedAIEngine(BaseAIEngine):
             "reason": "Clasificación inicial basada en coincidencia de nombre/código"
         }
 
+    def _extract_from_learning(
+        self,
+        text: str,
+        target_entity: str,
+        target_field: str,
+        document_type_id: int | None = None
+    ) -> str | None:
+        if not self.db:
+            return None
+
+        query = (
+            self.db.query(ExtractionLearningExample)
+            .filter(
+                ExtractionLearningExample.target_entity == target_entity,
+                ExtractionLearningExample.target_field == target_field
+            )
+        )
+
+        if document_type_id:
+            query = query.filter(
+                ExtractionLearningExample.document_type_id == document_type_id
+            )
+
+        examples = query.order_by(
+            ExtractionLearningExample.created_at.desc()
+        ).limit(25).all()
+
+        text_lower = text.lower()
+
+        for example in examples:
+            original = (example.original_value or "").strip()
+            corrected = (example.corrected_value or "").strip()
+
+            if not original or not corrected:
+                continue
+
+            if original.lower() in text_lower:
+                return corrected
+
+        return None
+
     def _extract_by_field_name(
         self,
         text: str,
@@ -93,7 +159,12 @@ class RuleBasedAIEngine(BaseAIEngine):
         if "fecha" in source:
             return self._extract_date(text)
 
-        if "identificacion" in source or "identificación" in source or "cedula" in source or "cédula" in source:
+        if (
+            "identificacion" in source
+            or "identificación" in source
+            or "cedula" in source
+            or "cédula" in source
+        ):
             return self._extract_identification(text)
 
         if "numero" in source or "número" in source or "requerimiento" in source:

@@ -1,6 +1,13 @@
 import "./ui.css";
 
 const statusMap = {
+  ok: "success",
+  warning: "warning",
+  error: "danger",
+
+  enabled: "success",
+  disabled: "muted",
+
   pending: "warning",
   in_progress: "info",
   completed: "success",
@@ -12,6 +19,8 @@ const statusMap = {
   complete: "success",
 
   uploaded: "info",
+  classified: "info",
+  understood: "success",
   excel_extracted: "success",
   pdf_extracted: "success",
   text_extracted: "success",
@@ -26,11 +35,12 @@ const statusMap = {
 };
 
 function StatusBadge({ value }) {
-  const statusClass = statusMap[value] || "muted";
+  const normalized = String(value || "sin estado");
+  const statusClass = statusMap[normalized] || "muted";
 
   return (
     <span className={`status-badge status-${statusClass}`}>
-      {value || "sin estado"}
+      {normalized}
     </span>
   );
 }

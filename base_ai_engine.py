@@ -8,21 +8,15 @@ class BaseAIEngine(ABC):
     def extract_fields(
         self,
         text: str,
-        extraction_fields: list
+        extraction_fields: list,
+        instructions: str | None = None
     ) -> list[AIExtractionResult]:
         pass
 
     @abstractmethod
-    def summarize(
-        self,
-        text: str
-    ) -> str:
+    def summarize(self, text: str) -> str:
         pass
 
     @abstractmethod
-    def classify_document(
-        self,
-        text: str,
-        document_types: list
-    ) -> dict:
+    def classify_document(self, text: str, document_types: list) -> dict:
         pass

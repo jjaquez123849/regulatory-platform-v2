@@ -7,6 +7,7 @@ import Button from "../../components/ui/Button.jsx";
 import DataTable from "../../components/table/DataTable.jsx";
 import LoadingState from "../../components/feedback/LoadingState.jsx";
 import ErrorState from "../../components/feedback/ErrorState.jsx";
+import Can from "../security/Can.jsx";
 
 import {
   getRecords,
@@ -61,7 +62,10 @@ function DocumentsPage() {
   const handleUpload = async (event) => {
     event.preventDefault();
 
-    if (!file) return;
+    if (!file) {
+      setError("Debe seleccionar un archivo.");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("file", file);
@@ -110,17 +114,23 @@ function DocumentsPage() {
       label: "Acciones",
       render: (row) => (
         <div className="row-actions">
-          <Button variant="secondary" onClick={() => handleClassify(row.id)}>
-            Clasificar
-          </Button>
+          <Can permission="DOCUMENT_CLASSIFY">
+            <Button variant="secondary" onClick={() => handleClassify(row.id)}>
+              Clasificar
+            </Button>
+          </Can>
 
-          <Button variant="secondary" onClick={() => handleUnderstand(row.id)}>
-            Entender
-          </Button>
+          <Can permission="DOCUMENT_UNDERSTAND">
+            <Button variant="secondary" onClick={() => handleUnderstand(row.id)}>
+              Entender
+            </Button>
+          </Can>
 
-          <Button variant="secondary" onClick={() => handleProcess(row.id)}>
-            Procesar
-          </Button>
+          <Can permission="DOCUMENT_PROCESS">
+            <Button variant="secondary" onClick={() => handleProcess(row.id)}>
+              Procesar
+            </Button>
+          </Can>
 
           <Link to={`/documents/${row.id}/understanding`}>
             Ver comprensión
@@ -141,51 +151,53 @@ function DocumentsPage() {
         description="Carga, clasificación, comprensión y procesamiento documental."
       />
 
-      <Card title="Cargar documento">
-        <form onSubmit={handleUpload} className="simple-form">
-          <label>
-            Registro
-            <select
-              value={recordId}
-              onChange={(event) => setRecordId(event.target.value)}
-            >
-              <option value="">Sin asociar</option>
-              {records.map((record) => (
-                <option key={record.id} value={record.id}>
-                  #{record.id} - {record.title || "Sin título"}
-                </option>
-              ))}
-            </select>
-          </label>
+      <Can permission="DOCUMENT_UPLOAD">
+        <Card title="Cargar documento">
+          <form onSubmit={handleUpload} className="simple-form">
+            <label>
+              Registro
+              <select
+                value={recordId}
+                onChange={(event) => setRecordId(event.target.value)}
+              >
+                <option value="">Sin asociar</option>
+                {records.map((record) => (
+                  <option key={record.id} value={record.id}>
+                    #{record.id} - {record.title || "Sin título"}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-          <label>
-            Tipo de documento
-            <select
-              value={documentTypeId}
-              onChange={(event) => setDocumentTypeId(event.target.value)}
-            >
-              <option value="">Detectar automáticamente</option>
-              {documentTypes.map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.name}
-                </option>
-              ))}
-            </select>
-          </label>
+            <label>
+              Tipo de documento
+              <select
+                value={documentTypeId}
+                onChange={(event) => setDocumentTypeId(event.target.value)}
+              >
+                <option value="">Detectar automáticamente</option>
+                {documentTypes.map((type) => (
+                  <option key={type.id} value={type.id}>
+                    {type.name}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-          <label>
-            Archivo
-            <input
-              type="file"
-              onChange={(event) => setFile(event.target.files[0])}
-            />
-          </label>
+            <label>
+              Archivo
+              <input
+                type="file"
+                onChange={(event) => setFile(event.target.files[0])}
+              />
+            </label>
 
-          <div className="form-actions">
-            <Button type="submit">Cargar documento</Button>
-          </div>
-        </form>
-      </Card>
+            <div className="form-actions">
+              <Button type="submit">Cargar documento</Button>
+            </div>
+          </form>
+        </Card>
+      </Can>
 
       <Card title="Documentos cargados">
         {loading && <LoadingState />}

@@ -27,6 +27,7 @@ from app.models import (
     AutomationRule,
     AutomationCondition,
     AutomationAction,
+    Notification,
 )
 
 from app.routes import (
@@ -46,6 +47,7 @@ from app.routes import (
     log_view,
     automation_admin,
     automation,
+    notifications,
 )
 
 
@@ -89,6 +91,7 @@ app.include_router(dashboard.router)
 app.include_router(log_view.router)
 app.include_router(automation_admin.router)
 app.include_router(automation.router)
+app.include_router(notifications.router)
 
 
 @app.get("/")
@@ -122,4 +125,5 @@ def health():
         "log_view_module": "enabled",
         "automation_admin_module": "enabled",
         "automation_engine": "enabled",
+        "notifications_module": "enabled",
     }

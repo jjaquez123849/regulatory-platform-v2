@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import Button from "../../components/ui/Button.jsx";
@@ -33,6 +33,15 @@ function WorkspacePage() {
     loadWorkspace();
   }, [recordId]);
 
+  const workspaceContext = useMemo(() => {
+    if (!workspace) return null;
+
+    return {
+      ...workspace,
+      refreshWorkspace: loadWorkspace,
+    };
+  }, [workspace]);
+
   return (
     <div className="workspace-page">
       {workspace?.record && (
@@ -50,7 +59,7 @@ function WorkspacePage() {
       )}
 
       <WorkspaceLoader
-        workspace={workspace}
+        workspace={workspaceContext}
         loading={loading}
         error={error}
       />

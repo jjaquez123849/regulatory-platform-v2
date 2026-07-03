@@ -1,3 +1,4 @@
+import json
 from dataclasses import asdict
 from pathlib import Path
 
@@ -13,6 +14,7 @@ from app.engines.documents.text_document_reader import (
     extract_text_from_msg
 )
 from app.models.document import Document
+from app.models.document_understanding import DocumentUnderstandingResult
 
 
 def extract_text_for_understanding(document: Document) -> str:
@@ -56,13 +58,44 @@ def understand_document(db: Session, document_id: int) -> dict:
     engine = get_document_intelligence_engine()
     understanding = engine.understand_document(text)
 
-    document.ai_summary = understanding.summary or document.ai_summary
+    data = asdict(understanding)
+
+    saved = DocumentUnderstandingResult(
+        document_id=document.id,
+        record_id=document.record_id,
+        document_type=data.get("document_type"),
+        issuer=data.get("issuer"),
+        regulator=data.get("regulator"),
+        subject=data.get("subject"),
+        summary=data.get("summary"),
+        request_number=data.get("request_number"),
+        request_date=data.get("request_date"),
+        due_date=data.get("due_date"),
+        entities_json=json.dumps(data.get("entities", []), ensure_ascii=False),
+        requests_json=json.dumps(data.get("requests", []), ensure_ascii=False),
+        metadata_json=json.dumps(data.get("metadata", {}), ensure_ascii=False),
+    )
+
+    db.add(saved)
+
+    document.ai_summary = data.get("summary") or document.ai_summary
     document.processing_status = "understood"
 
     db.commit()
+    db.refresh(saved)
 
     return {
         "document_id": document.id,
+        "understanding_id": saved.id,
         "status": document.processing_status,
-        "understanding": asdict(understanding)
+        "understanding": data
     }
+
+
+def list_document_understandings(db: Session, document_id: int) -> list[DocumentUnderstandingResult]:
+    return (
+        db.query(DocumentUnderstandingResult)
+        .filter(DocumentUnderstandingResult.document_id == document_id)
+        .order_by(DocumentUnderstandingResult.created_at.desc())
+        .all()
+    )

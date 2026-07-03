@@ -4,9 +4,22 @@ import StatusBadge from "../../ui/StatusBadge.jsx";
 import { useWorkspace } from "../engine/WorkspaceContext.jsx";
 import { hasWorkspaceAction } from "../engine/WorkspacePermissions.js";
 
+import { updateTask } from "../../../features/tasks/tasksApi.js";
+
 function TasksWidget() {
   const workspace = useWorkspace();
   const tasks = workspace.tasks || [];
+
+  const refresh = workspace.refreshWorkspace || (() => {});
+
+  const handleComplete = async (taskId) => {
+    await updateTask(taskId, {
+      status: "completed",
+      completed_by: "user",
+    });
+
+    refresh();
+  };
 
   const columns = [
     { key: "id", label: "ID" },
@@ -30,7 +43,7 @@ function TasksWidget() {
       render: (row) =>
         row.status !== "completed" &&
         hasWorkspaceAction(workspace, "COMPLETE_TASK") ? (
-          <Button variant="secondary">
+          <Button variant="secondary" onClick={() => handleComplete(row.id)}>
             Completar
           </Button>
         ) : (

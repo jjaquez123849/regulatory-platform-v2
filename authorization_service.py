@@ -56,7 +56,6 @@ class AuthorizationService:
         )
 
         result = sorted(set(item.code for item in permissions))
-
         legacy_role_permissions = self._legacy_role_permissions(user.role)
 
         return sorted(set(result + legacy_role_permissions))
@@ -95,12 +94,10 @@ class AuthorizationService:
 
     def can(self, user: User, permission_code: str) -> bool:
         permissions = self.get_user_permissions(user)
-
         return "*" in permissions or permission_code in permissions
 
     def has_capability(self, user: User, capability_code: str) -> bool:
         capabilities = self.get_user_capabilities(user)
-
         return "*" in capabilities or capability_code in capabilities
 
     def get_effective_access(self, user: User) -> dict:
@@ -153,13 +150,9 @@ class AuthorizationService:
             "AUDIT_VIEW": "VIEW_AUDIT",
         }
 
-        actions = []
-
-        for permission, action in mapping.items():
-            if permission in permissions:
-                actions.append(action)
-
-        return sorted(set(actions))
+        return sorted(
+            set(action for permission, action in mapping.items() if permission in permissions)
+        )
 
     def _legacy_role_permissions(self, role: str | None) -> list[str]:
         if not role:
@@ -168,48 +161,62 @@ class AuthorizationService:
         role = role.lower()
 
         legacy = {
-            "admin": [
-                "*",
-            ],
+            "admin": ["*"],
             "supervisor": [
+                "AI_VIEW",
                 "RECORD_VIEW",
                 "RECORD_EDIT",
+                "DOCUMENT_VIEW",
                 "DOCUMENT_UPLOAD",
                 "DOCUMENT_CLASSIFY",
                 "DOCUMENT_UNDERSTAND",
                 "DOCUMENT_PROCESS",
                 "EXTRACTION_APPLY",
-                "QUALITY_RUN",
-                "QUALITY_RESOLVE",
+                "TASK_VIEW",
                 "TASK_CREATE",
                 "TASK_ASSIGN",
                 "TASK_COMPLETE",
+                "QUALITY_VIEW",
+                "QUALITY_RUN",
+                "QUALITY_RESOLVE",
+                "WORKFLOW_VIEW",
                 "WORKFLOW_CHANGE",
                 "COMMENT_CREATE",
                 "AUDIT_VIEW",
                 "DASHBOARD_VIEW",
             ],
             "analyst": [
+                "AI_VIEW",
                 "RECORD_VIEW",
                 "RECORD_EDIT",
+                "DOCUMENT_VIEW",
                 "DOCUMENT_UPLOAD",
                 "DOCUMENT_CLASSIFY",
                 "DOCUMENT_UNDERSTAND",
                 "DOCUMENT_PROCESS",
                 "EXTRACTION_APPLY",
+                "TASK_VIEW",
                 "TASK_CREATE",
                 "TASK_COMPLETE",
                 "COMMENT_CREATE",
             ],
             "quality": [
+                "AI_VIEW",
                 "RECORD_VIEW",
+                "DOCUMENT_VIEW",
+                "TASK_VIEW",
+                "QUALITY_VIEW",
                 "QUALITY_RUN",
                 "QUALITY_RESOLVE",
                 "COMMENT_CREATE",
                 "AUDIT_VIEW",
             ],
             "viewer": [
+                "AI_VIEW",
                 "RECORD_VIEW",
+                "DOCUMENT_VIEW",
+                "TASK_VIEW",
+                "QUALITY_VIEW",
                 "DASHBOARD_VIEW",
             ],
         }

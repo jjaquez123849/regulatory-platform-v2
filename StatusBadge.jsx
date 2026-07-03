@@ -5,15 +5,24 @@ const statusMap = {
   in_progress: "info",
   completed: "success",
   cancelled: "muted",
+
   approved: "success",
   observed: "warning",
   incomplete: "danger",
   complete: "success",
+
   uploaded: "info",
   excel_extracted: "success",
   pdf_extracted: "success",
   text_extracted: "success",
   unsupported_for_now: "muted",
+
+  unread: "warning",
+  read: "success",
+
+  low: "muted",
+  medium: "info",
+  high: "danger",
 };
 
 function StatusBadge({ value }) {

@@ -8,6 +8,16 @@ const apiClient = axios.create({
   timeout: 30000,
 });
 
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access_token");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -15,6 +25,10 @@ apiClient.interceptors.response.use(
       error?.response?.data?.detail ||
       error?.message ||
       "Error desconocido";
+
+    if (error?.response?.status === 401) {
+      localStorage.removeItem("access_token");
+    }
 
     return Promise.reject({
       message,

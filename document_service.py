@@ -111,6 +111,36 @@ def upload_document(
     db.commit()
     db.refresh(document)
 
+    if record and record.process_id:
+        try:
+            from app.core.automation_events import AutomationEvent
+            from app.services.automation_engine_service import run_automation_event
+
+            run_automation_event(
+                db=db,
+                process_id=record.process_id,
+                trigger_event=AutomationEvent.DOCUMENT_UPLOADED,
+                context={
+                    "record": {
+                        "id": record.id,
+                        "process_id": record.process_id,
+                        "current_state_id": record.current_state_id,
+                    },
+                    "document": {
+                        "id": document.id,
+                        "document_type_id": document.document_type_id,
+                        "file_extension": document.file_extension,
+                        "direction": document.direction,
+                        "processing_status": document.processing_status,
+                    },
+                    "event": {
+                        "name": AutomationEvent.DOCUMENT_UPLOADED,
+                    },
+                }
+            )
+        except Exception:
+            pass
+
     return document
 
 

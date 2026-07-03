@@ -136,6 +136,40 @@ def run_quality_review(
 
     db.commit()
     db.refresh(review)
+    try:
+        from app.core.automation_events import AutomationEvent
+        from app.services.automation_engine_service import run_automation_event
+
+        event_name = (
+            AutomationEvent.QUALITY_FAILED
+            if review.has_missing_items
+            else AutomationEvent.QUALITY_COMPLETED
+        )
+
+        run_automation_event(
+            db=db,
+            process_id=record.process_id,
+            trigger_event=event_name,
+            context={
+                "record": {
+                    "id": record.id,
+                    "process_id": record.process_id,
+                    "is_complete": record.is_complete,
+                    "has_pending_items": record.has_pending_items,
+                },
+                "quality": {
+                    "review_id": review.id,
+                    "status": review.status,
+                    "score": review.score,
+                    "has_missing_items": review.has_missing_items,
+                },
+                "event": {
+                    "name": event_name,
+                },
+            }
+        )
+    except Exception:
+        pass
 
     return review
 

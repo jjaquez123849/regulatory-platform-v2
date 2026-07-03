@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 from app.engines.ai.ai_engine_factory import get_ai_engine
 from app.models.document import Document, DocumentExtractionResult
 from app.models.document_config import DocumentExtractionField
+from app.services.ai_runtime_service import get_active_ai_instructions
+from app.services.record_service import get_record
 
 
 def extract_text_from_pdf(file_path: Path) -> str:
@@ -48,10 +50,28 @@ def read_pdf_with_config(
     if not text:
         errors.append("No se pudo extraer texto del PDF. Puede ser escaneado o imagen.")
 
+    process_id = None
+
+    if document.record_id:
+        record = get_record(db, document.record_id)
+        if record:
+            process_id = record.process_id
+
+    instructions = None
+
+    if process_id:
+        instructions = get_active_ai_instructions(
+            db=db,
+            process_id=process_id,
+            document_type_id=document.document_type_id,
+            purpose="extraction"
+        )
+
     ai_engine = get_ai_engine(db)
     ai_results = ai_engine.extract_fields(
         text=text,
-        extraction_fields=extraction_fields
+        extraction_fields=extraction_fields,
+        instructions=instructions
     )
 
     for ai_result in ai_results:
@@ -79,7 +99,7 @@ def read_pdf_with_config(
         )
 
     document.ai_summary = ai_engine.summarize(text) if text else None
-    document.ai_confidence = "0.55" if results else "0.0"
+    document.ai_confidence = "0.60" if results else "0.0"
     document.processing_status = "pdf_extracted" if not errors else "pdf_extracted_with_errors"
 
     db.commit()
@@ -88,6 +108,7 @@ def read_pdf_with_config(
         "document_id": document.id,
         "status": document.processing_status,
         "text_preview": text[:1000],
+        "instructions_used": bool(instructions),
         "results_count": len(results),
         "results": results,
         "errors": errors

@@ -29,6 +29,7 @@ from app.models import (
     AutomationAction,
     Notification,
     AIConfiguration,
+    DocumentUnderstandingResult,
 )
 
 from app.routes import (

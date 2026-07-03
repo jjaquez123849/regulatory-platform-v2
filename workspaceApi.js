@@ -7,3 +7,7 @@ export function getRecordWorkspace(recordId) {
 export function updateRecordLogValues(recordId, payload) {
   return apiClient.put(`/log-edit/records/${recordId}/values`, payload);
 }
+
+export function getLogCompletion(recordId) {
+  return apiClient.get(`/log-intelligence/records/${recordId}/completion`);
+}

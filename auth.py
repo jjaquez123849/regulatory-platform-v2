@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.core.auth_dependencies import get_current_user, require_admin
 from app.core.database import get_db
+from app.models.security import User
 from app.schemas.auth_schema import (
     LoginRequest,
     TokenResponse,
@@ -36,10 +38,18 @@ def login(
         raise HTTPException(status_code=401, detail=str(error))
 
 
+@router.get("/me", response_model=UserResponse)
+def read_me(
+    current_user: User = Depends(get_current_user)
+):
+    return current_user
+
+
 @router.post("/users", response_model=UserResponse)
 def create_new_user(
     payload: UserCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
 ):
     try:
         return create_user(db, payload.model_dump())
@@ -49,6 +59,7 @@ def create_new_user(
 
 @router.get("/users", response_model=list[UserResponse])
 def read_users(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin)
 ):
     return list_users(db)

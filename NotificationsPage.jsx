@@ -7,7 +7,7 @@ import DataTable from "../../components/table/DataTable.jsx";
 import StatusBadge from "../../components/ui/StatusBadge.jsx";
 import LoadingState from "../../components/feedback/LoadingState.jsx";
 import ErrorState from "../../components/feedback/ErrorState.jsx";
-
+import "../../components/forms/forms.css";
 import {
   getNotifications,
   markNotificationRead,

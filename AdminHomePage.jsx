@@ -9,7 +9,7 @@ function AdminHomePage() {
     <>
       <PageHeader
         title="Administración"
-        description="Configuración sin código de procesos, campos, documentos, workflow y automatizaciones."
+        description="Configuración sin código de procesos, campos, documentos, workflow, automatizaciones e IA."
       />
 
       <div className="admin-grid">
@@ -36,6 +36,11 @@ function AdminHomePage() {
         <Card title="Automatizaciones">
           <p>Configurar reglas: evento, condiciones y acciones automáticas.</p>
           <Link to="/admin/automation">Abrir automatizaciones</Link>
+        </Card>
+
+        <Card title="IA">
+          <p>Configurar instrucciones, extracción, clasificación, calidad y copiloto.</p>
+          <Link to="/admin/ai">Abrir configuración IA</Link>
         </Card>
       </div>
     </>

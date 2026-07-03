@@ -6,45 +6,51 @@ import {
   FolderOpen,
   CheckSquare,
   ShieldCheck,
-  Settings
+  Bell,
+  Settings,
 } from "lucide-react";
 
 const navItems = [
   {
     label: "Dashboard",
     path: "/",
-    icon: LayoutDashboard
+    icon: LayoutDashboard,
   },
   {
     label: "Log",
     path: "/log",
-    icon: ClipboardList
+    icon: ClipboardList,
   },
   {
     label: "Registros",
     path: "/records",
-    icon: FolderOpen
+    icon: FolderOpen,
   },
   {
     label: "Documentos",
     path: "/documents",
-    icon: FileText
+    icon: FileText,
   },
   {
     label: "Tareas",
     path: "/tasks",
-    icon: CheckSquare
+    icon: CheckSquare,
   },
   {
     label: "Calidad",
     path: "/quality",
-    icon: ShieldCheck
+    icon: ShieldCheck,
+  },
+  {
+    label: "Notificaciones",
+    path: "/notifications",
+    icon: Bell,
   },
   {
     label: "Administración",
     path: "/admin",
-    icon: Settings
-  }
+    icon: Settings,
+  },
 ];
 
 function Sidebar() {

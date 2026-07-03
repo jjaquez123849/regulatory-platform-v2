@@ -9,7 +9,7 @@ import DocumentsPage from "../../features/documents/DocumentsPage.jsx";
 import ExtractionResultsPage from "../../features/extraction/ExtractionResultsPage.jsx";
 import TasksPage from "../../features/tasks/TasksPage.jsx";
 import QualityPage from "../../features/quality/QualityPage.jsx";
-
+import AutomationPage from "../../features/admin/automation/AutomationPage.jsx";
 import AdminHomePage from "../../features/admin/AdminHomePage.jsx";
 import ProcessesPage from "../../features/admin/processes/ProcessesPage.jsx";
 import FieldsPage from "../../features/admin/fields/FieldsPage.jsx";
@@ -33,6 +33,7 @@ function AppRoutes() {
         <Route path="/admin/fields" element={<FieldsPage />} />
         <Route path="/admin/documents" element={<DocumentTypesPage />} />
         <Route path="/admin/workflow" element={<WorkflowPage />} />
+        <Route path="/admin/automation" element={<AutomationPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

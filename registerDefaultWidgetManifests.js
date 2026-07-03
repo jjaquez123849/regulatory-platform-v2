@@ -1,56 +1,25 @@
-import { registerWidgetManifest } from "./WidgetManifestRegistry.js";
+import { registerWidget } from "./WidgetRegistry.js";
 
-export function registerDefaultWidgetManifests() {
-  registerWidgetManifest("AI_SUMMARY", {
-    widget: "AI_SUMMARY",
-    title: "Resumen IA",
-    version: "1.0",
-    permissions: ["AI_VIEW"],
-    actions: [],
-  });
+import AIWidget from "../widgets/AIWidget.jsx";
+import TimelineWidget from "../widgets/TimelineWidget.jsx";
+import LogWidget from "../widgets/LogWidget.jsx";
+import DocumentsWidget from "../widgets/DocumentsWidget.jsx";
+import TasksWidget from "../widgets/TasksWidget.jsx";
+import QualityWidget from "../widgets/QualityWidget.jsx";
+import PeopleWidget from "../widgets/PeopleWidget.jsx";
+import RequestsWidget from "../widgets/RequestsWidget.jsx";
+import CommentsWidget from "../widgets/CommentsWidget.jsx";
+import AuditWidget from "../widgets/AuditWidget.jsx";
 
-  registerWidgetManifest("TIMELINE", {
-    widget: "TIMELINE",
-    title: "Timeline",
-    version: "1.0",
-    permissions: ["RECORD_VIEW"],
-    actions: [],
-  });
-
-  registerWidgetManifest("LOG", {
-    widget: "LOG",
-    title: "Log",
-    version: "1.0",
-    permissions: ["RECORD_VIEW"],
-    actions: ["EDIT_LOG"],
-  });
-
-  registerWidgetManifest("DOCUMENTS", {
-    widget: "DOCUMENTS",
-    title: "Documentos",
-    version: "1.0",
-    permissions: ["DOCUMENT_VIEW"],
-    actions: [
-      "UPLOAD_DOCUMENT",
-      "CLASSIFY_DOCUMENT",
-      "UNDERSTAND_DOCUMENT",
-      "PROCESS_DOCUMENT",
-    ],
-  });
-
-  registerWidgetManifest("TASKS", {
-    widget: "TASKS",
-    title: "Tareas",
-    version: "1.0",
-    permissions: ["TASK_VIEW"],
-    actions: ["CREATE_TASK", "ASSIGN_TASK", "COMPLETE_TASK"],
-  });
-
-  registerWidgetManifest("QUALITY", {
-    widget: "QUALITY",
-    title: "Calidad",
-    version: "1.0",
-    permissions: ["QUALITY_VIEW"],
-    actions: ["RUN_QUALITY", "RESOLVE_QUALITY_ISSUE"],
-  });
+export function registerDefaultWidgets() {
+  registerWidget("AI_SUMMARY", AIWidget);
+  registerWidget("TIMELINE", TimelineWidget);
+  registerWidget("LOG", LogWidget);
+  registerWidget("DOCUMENTS", DocumentsWidget);
+  registerWidget("TASKS", TasksWidget);
+  registerWidget("QUALITY", QualityWidget);
+  registerWidget("PEOPLE", PeopleWidget);
+  registerWidget("REQUESTS", RequestsWidget);
+  registerWidget("COMMENTS", CommentsWidget);
+  registerWidget("AUDIT", AuditWidget);
 }

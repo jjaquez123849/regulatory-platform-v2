@@ -1,6 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import AppShell from "../layout/AppShell.jsx";
+import ProtectedRoute from "../../features/security/ProtectedRoute.jsx";
+import LoginPage from "../../features/security/LoginPage.jsx";
 
 import DashboardPage from "../../features/dashboard/DashboardPage.jsx";
 import LogPage from "../../features/log/LogPage.jsx";
@@ -20,11 +22,20 @@ import DocumentTypesPage from "../../features/admin/documents/DocumentTypesPage.
 import WorkflowPage from "../../features/admin/workflow/WorkflowPage.jsx";
 import AutomationPage from "../../features/admin/automation/AutomationPage.jsx";
 import AIConfigPage from "../../features/admin/ai/AIConfigPage.jsx";
+import IAMPage from "../../features/admin/iam/IAMPage.jsx";
 
 function AppRoutes() {
   return (
     <Routes>
-      <Route element={<AppShell />}>
+      <Route path="/login" element={<LoginPage />} />
+
+      <Route
+        element={
+          <ProtectedRoute>
+            <AppShell />
+          </ProtectedRoute>
+        }
+      >
         <Route path="/" element={<DashboardPage />} />
         <Route path="/log" element={<LogPage />} />
         <Route path="/records" element={<RecordsPage />} />
@@ -45,6 +56,7 @@ function AppRoutes() {
         <Route path="/admin/workflow" element={<WorkflowPage />} />
         <Route path="/admin/automation" element={<AutomationPage />} />
         <Route path="/admin/ai" element={<AIConfigPage />} />
+        <Route path="/admin/iam" element={<IAMPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

@@ -11,3 +11,7 @@ export function updateRecordLogValues(recordId, payload) {
 export function getLogCompletion(recordId) {
   return apiClient.get(`/log-intelligence/records/${recordId}/completion`);
 }
+
+export function analyzeWorkspaceWithAI(recordId) {
+  return apiClient.post(`/workspace-ai/records/${recordId}/analyze`);
+}

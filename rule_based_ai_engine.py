@@ -12,50 +12,56 @@ class RuleBasedAIEngine(BaseAIEngine):
         self.db = db
 
     def extract_fields(
-        self,
-        text: str,
-        extraction_fields: list
-    ) -> list[AIExtractionResult]:
-        results = []
+    self,
+    text: str,
+    extraction_fields: list,
+    instructions: str | None = None
+) -> list[AIExtractionResult]:
+    results = []
 
-        for field in extraction_fields:
-            learned_value = self._extract_from_learning(
-                text=text,
-                target_entity=field.target_entity,
-                target_field=field.target_field,
-                document_type_id=field.document_type_id
+    enriched_text = text
+
+    if instructions:
+        enriched_text = f"{instructions}\n\n{text}"
+
+    for field in extraction_fields:
+        learned_value = self._extract_from_learning(
+            text=enriched_text,
+            target_entity=field.target_entity,
+            target_field=field.target_field,
+            document_type_id=field.document_type_id
+        )
+
+        if learned_value:
+            results.append(
+                AIExtractionResult(
+                    target_entity=field.target_entity,
+                    target_field=field.target_field,
+                    value=learned_value,
+                    confidence_score=0.75,
+                    explanation="Valor sugerido usando ejemplos aprendidos."
+                )
+            )
+            continue
+
+        value = self._extract_by_field_name(
+            text=enriched_text,
+            source_name=field.source_name,
+            instructions=field.instructions
+        )
+
+        if value:
+            results.append(
+                AIExtractionResult(
+                    target_entity=field.target_entity,
+                    target_field=field.target_field,
+                    value=value,
+                    confidence_score=0.60 if instructions else 0.55,
+                    explanation=f"Valor detectado usando reglas e instrucciones para {field.source_name}"
+                )
             )
 
-            if learned_value:
-                results.append(
-                    AIExtractionResult(
-                        target_entity=field.target_entity,
-                        target_field=field.target_field,
-                        value=learned_value,
-                        confidence_score=0.75,
-                        explanation="Valor sugerido usando ejemplos aprendidos."
-                    )
-                )
-                continue
-
-            value = self._extract_by_field_name(
-                text=text,
-                source_name=field.source_name,
-                instructions=field.instructions
-            )
-
-            if value:
-                results.append(
-                    AIExtractionResult(
-                        target_entity=field.target_entity,
-                        target_field=field.target_field,
-                        value=value,
-                        confidence_score=0.55,
-                        explanation=f"Valor detectado usando regla inicial para {field.source_name}"
-                    )
-                )
-
-        return results
+    return results
 
     def summarize(self, text: str) -> str:
         clean_text = " ".join(text.split())

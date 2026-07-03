@@ -28,3 +28,7 @@ export function classifyDocument(documentId) {
 export function processDocument(documentId) {
   return apiClient.post(`/document-processing/${documentId}/process`);
 }
+
+export function understandDocument(documentId) {
+  return apiClient.post(`/document-understanding/${documentId}/understand`);
+}

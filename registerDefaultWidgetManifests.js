@@ -17,6 +17,14 @@ export function registerDefaultWidgetManifests() {
     actions: [],
   });
 
+  registerWidgetManifest("LOG_COMPLETION", {
+    widget: "LOG_COMPLETION",
+    title: "Completitud del Log",
+    version: "1.0",
+    permissions: ["RECORD_VIEW"],
+    actions: [],
+  });
+
   registerWidgetManifest("LOG", {
     widget: "LOG",
     title: "Log",

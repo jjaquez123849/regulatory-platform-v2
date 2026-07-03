@@ -73,6 +73,7 @@ from app.routes import (
     comments,
     log_edit,
     work_queues,
+    log_intelligence,
 )
 
 
@@ -107,6 +108,7 @@ app.include_router(workspace.router)
 app.include_router(comments.router)
 app.include_router(log_edit.router)
 app.include_router(work_queues.router)
+app.include_router(log_intelligence.router)
 
 app.include_router(admin.router)
 app.include_router(document_admin.router)
@@ -153,6 +155,7 @@ def health():
         "comments_module": "enabled",
         "log_edit_module": "enabled",
         "work_queues_module": "enabled",
+        "log_intelligence_module": "enabled",
         "admin_module": "enabled",
         "document_admin_module": "enabled",
         "workflow_admin_module": "enabled",

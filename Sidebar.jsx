@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   Bell,
   Activity,
+  Inbox,
   Settings,
 } from "lucide-react";
 
@@ -16,6 +17,11 @@ const navItems = [
     label: "Dashboard",
     path: "/",
     icon: LayoutDashboard,
+  },
+  {
+    label: "Bandejas",
+    path: "/queues",
+    icon: Inbox,
   },
   {
     label: "Log",

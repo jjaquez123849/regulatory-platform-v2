@@ -12,3 +12,5 @@ beautifulsoup4
 lxml
 extract-msg
 python-docx
+passlib[bcrypt]
+python-jose

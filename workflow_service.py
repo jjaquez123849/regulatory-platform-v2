@@ -105,6 +105,33 @@ def apply_transition(
 
     db.commit()
     db.refresh(record)
+    try:
+        from app.core.automation_events import AutomationEvent
+        from app.services.automation_engine_service import run_automation_event
+
+        run_automation_event(
+            db=db,
+            process_id=record.process_id,
+            trigger_event=AutomationEvent.WORKFLOW_CHANGED,
+            context={
+                "record": {
+                    "id": record.id,
+                    "process_id": record.process_id,
+                    "previous_state_id": previous_state_id,
+                    "current_state_id": record.current_state_id,
+                },
+                "transition": {
+                    "id": transition.id,
+                    "code": transition.code,
+                    "name": transition.name,
+                },
+                "event": {
+                    "name": AutomationEvent.WORKFLOW_CHANGED,
+                },
+            }
+        )
+    except Exception:
+        pass
 
     return record
 

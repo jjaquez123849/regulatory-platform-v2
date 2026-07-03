@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 import PageHeader from "../../components/ui/PageHeader.jsx";
 import Card from "../../components/ui/Card.jsx";
@@ -7,6 +8,7 @@ import DataTable from "../../components/table/DataTable.jsx";
 import DynamicForm from "../../components/forms/DynamicForm.jsx";
 import LoadingState from "../../components/feedback/LoadingState.jsx";
 import ErrorState from "../../components/feedback/ErrorState.jsx";
+import Can from "../security/Can.jsx";
 
 import {
   getProcesses,
@@ -55,7 +57,7 @@ function RecordsPage() {
       setFields(fieldsResponse.data);
       setRecords(recordsResponse.data);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Error cargando registros");
     } finally {
       setLoading(false);
     }
@@ -100,6 +102,15 @@ function RecordsPage() {
         label: "Pendientes",
         render: (row) => (row.has_pending_items ? "Sí" : "No"),
       },
+      {
+        key: "actions",
+        label: "Acciones",
+        render: (row) => (
+          <Link to={`/records/${row.id}/workspace`}>
+            Abrir Workspace
+          </Link>
+        ),
+      },
     ];
 
     const dynamicColumns = fields
@@ -121,11 +132,13 @@ function RecordsPage() {
     <>
       <PageHeader
         title="Registros"
-        description="Requerimientos/casos operativos generados por el workflow."
+        description="Expedientes operativos generados por el workflow."
         actions={
-          <Button onClick={() => setCreating((value) => !value)}>
-            Nuevo registro
-          </Button>
+          <Can permission="RECORD_EDIT">
+            <Button onClick={() => setCreating((value) => !value)}>
+              Nuevo registro
+            </Button>
+          </Can>
         }
       />
 
@@ -149,34 +162,36 @@ function RecordsPage() {
       </Card>
 
       {creating && (
-        <Card title="Nuevo registro">
-          <div className="simple-form">
-            <label>
-              Título
-              <input
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder="Título o referencia del requerimiento"
-              />
-            </label>
+        <Can permission="RECORD_EDIT">
+          <Card title="Nuevo registro">
+            <div className="simple-form">
+              <label>
+                Título
+                <input
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  placeholder="Título o referencia del requerimiento"
+                />
+              </label>
 
-            <label>
-              Resumen
-              <textarea
-                value={summary}
-                onChange={(event) => setSummary(event.target.value)}
-              />
-            </label>
-          </div>
+              <label>
+                Resumen
+                <textarea
+                  value={summary}
+                  onChange={(event) => setSummary(event.target.value)}
+                />
+              </label>
+            </div>
 
-          <br />
+            <br />
 
-          <DynamicForm
-            fields={fields}
-            onSubmit={handleCreateRecord}
-            submitLabel="Crear registro"
-          />
-        </Card>
+            <DynamicForm
+              fields={fields}
+              onSubmit={handleCreateRecord}
+              submitLabel="Crear registro"
+            />
+          </Card>
+        </Can>
       )}
 
       <Card title="Registros">

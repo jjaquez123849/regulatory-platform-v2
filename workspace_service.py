@@ -169,10 +169,13 @@ def get_record_workspace(db: Session, record_id: int, current_user) -> dict:
             "id": "log",
             "code": "log",
             "title": "Log",
-            "description": "Información oficial del expediente.",
+            "description": "Información oficial del expediente y estado de completitud.",
             "order": 3,
             "visible": True,
-            "widgets": [{"id": "log", "widget": "LOG"}],
+            "widgets": [
+                {"id": "log_completion", "widget": "LOG_COMPLETION"},
+                {"id": "log", "widget": "LOG"},
+            ],
         },
         {
             "id": "people_requests",
